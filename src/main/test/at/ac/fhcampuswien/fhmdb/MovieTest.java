@@ -11,23 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 class MovieTest {
-    @Test
-    void initializeMovie_is_not_null() {
-        //Given
-        List<Movie> actual;
-
-        //When
-        actual = Movie.initializeMovies();
-
-        //Then
-        assertNotNull(actual);
-
-    }
-
-    @Test
-    void initializeMovie_all_Movies_stay_the_same_after_initialize() {
-        //Given
-        List<Movie> actual;
+    List<Movie> getListofMovies() {
         List<Movie> expected = new ArrayList<>();
 
         expected.add(new Movie(
@@ -68,12 +52,99 @@ class MovieTest {
                 Arrays.asList(Genres.ADVENTURE, Genres.COMEDY, Genres.ACTION)
         ));
 
+        return expected;
+    }
+
+    @Test
+    void initializeMovie_is_not_null() {
+        //Given
+        List<Movie> actual;
+
         //When
         actual = Movie.initializeMovies();
 
         //Then
+        assertNotNull(actual);
+
+    }
+
+    @Test
+    void initializeMovie_all_Movie_titles_stay_the_same_after_initialization() {
+        //Given
+        List<Movie> actual;
+
+
+        //When
+        actual = Movie.initializeMovies();
+        List<Movie> expected = getListofMovies();
+
+        //Then
         for (int i = 0; i < actual.size(); i++) {
-            assertEquals(expected.get(i), actual.get(i));
+            assertEquals(expected.get(i).getTitle(), actual.get(i).getTitle());
+        }
+    }
+
+    @Test
+    void initializeMovie_all_Movie_descriptions_stay_the_same_after_initialization() {
+        //Given
+        List<Movie> actual;
+
+
+        //When
+        actual = Movie.initializeMovies();
+        List<Movie> expected = getListofMovies();
+
+        //Then
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getDescription(), actual.get(i).getDescription());
+        }
+    }
+
+    @Test
+    void initializeMovie_all_Movie_titleLowercaseNormalized_stay_the_same_after_initialization() {
+        //Given
+        List<Movie> actual;
+
+
+        //When
+        actual = Movie.initializeMovies();
+        List<Movie> expected = getListofMovies();
+
+        //Then
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getTitleLowercaseNormalized(), actual.get(i).getTitleLowercaseNormalized());
+        }
+    }
+
+    @Test
+    void initializeMovie_all_Movie_descriptionLowercaseNormalized_stay_the_same_after_initialization() {
+        //Given
+        List<Movie> actual;
+
+
+        //When
+        actual = Movie.initializeMovies();
+        List<Movie> expected = getListofMovies();
+
+        //Then
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getDescriptionLowercaseNormalized(), actual.get(i).getDescriptionLowercaseNormalized());
+        }
+    }
+
+    @Test
+    void initializeMovie_all_Movie_Genres_stay_the_same_after_initialization() {
+        //Given
+        List<Movie> actual;
+
+
+        //When
+        actual = Movie.initializeMovies();
+        List<Movie> expected = getListofMovies();
+
+        //Then
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getGenres(), actual.get(i).getGenres());
         }
     }
 
@@ -87,6 +158,19 @@ class MovieTest {
 
         //Then
         String expected = "the wolf of wall street";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void normalizeString_AvAtAr_to_avatar() {
+        //Given
+        String actual = "AvAtAr";
+
+        //When
+        actual = Movie.normalizeString(actual);
+
+        //Then
+        String expected = "avatar";
         assertEquals(expected, actual);
     }
 }
