@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.fhmdb.models;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +8,8 @@ import java.util.List;
 public class Movie {
     private String title;
     private String description;
+    private String titleLowercaseNormalized;
+    private String descriptionLowercaseNormalized;
 
     private final List<Genres> genres;
     // TODO add more properties here
@@ -14,7 +17,24 @@ public class Movie {
     public Movie(String title, String description, List<Genres> genres) {
         this.title = title;
         this.description = description;
+        this.titleLowercaseNormalized = normalizeString(title);
+        this.descriptionLowercaseNormalized = normalizeString(description);
         this.genres = genres;
+    }
+
+    public String getTitleLowercaseNormalized() {
+        return titleLowercaseNormalized;
+    }
+
+    public String getDescriptionLowercaseNormalized() {
+        return descriptionLowercaseNormalized;
+    }
+
+    // Normalization method
+    private static String normalizeString(String input) {
+        return Normalizer.normalize(input, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase();
     }
 
     public String getTitle() {
@@ -25,9 +45,10 @@ public class Movie {
         return description;
     }
 
+    public List<Genres> getGenres() { return genres; }
+
     public static List<Movie> initializeMovies(){
         List<Movie> movies = new ArrayList<>();
-        // TODO add some dummy data here
 
         movies.add(new Movie(
                 "Interstellar",
@@ -56,7 +77,7 @@ public class Movie {
         movies.add(new Movie(
                 "Avatar",
                 "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn " +
-                        "between following his orders and protecting the world he feels is his home.",
+                        "between following his orders and protecting the world he feels is his home. äää",
                 Arrays.asList(Genres.ANIMATION, Genres.DRAMA, Genres.ACTION)));
         movies.add(new Movie(
                 "One Piece film red",
