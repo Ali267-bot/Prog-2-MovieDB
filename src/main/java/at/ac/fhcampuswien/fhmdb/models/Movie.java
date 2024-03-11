@@ -30,8 +30,15 @@ public class Movie {
         return descriptionLowercaseNormalized;
     }
 
-    // Normalization method
-    private static String normalizeString(String input) {
+
+    /**
+     * Normalizes text by removing diacritical marks and converting to lowercase. This enhances string comparison
+     * by making it insensitive to case and accents.
+     *
+     * @param input The string to be normalized.
+     * @return The normalized string, lowercase and without diacritical marks.
+     */
+    public static String normalizeString(String input) {
         return Normalizer.normalize(input, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "")
                 .toLowerCase();

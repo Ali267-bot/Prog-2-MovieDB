@@ -20,6 +20,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static at.ac.fhcampuswien.fhmdb.models.Movie.normalizeString;
+
 /**
  * HomeController manages the UI logic for the Movie list and filter functionality.
  */
@@ -113,20 +115,21 @@ public class HomeController implements Initializable {
     }
 
     /**
-     * Filters the list of movies based on a search text.
+     * Creates a predicate for filtering movies based on a search text. The predicate checks if the given search text is
+     * contained in either the movie's title or description, disregarding case sensitivity and diacritical marks.
+     * Both the movie's title and description are pre-normalized to lowercase without diacritical marks for efficient searching.
      *
-     * @param searchText The text to search for in movie titles.
-     * @return A predicate that returns true for movies that contain the search text in their title.
+     * @param searchText The text to search for within the movie's title and description. The search ignores case sensitivity
+     *                   and diacritical marks (e.g., accents).
+     * @return A predicate that evaluates to {@code true} for movies where the normalized title or description contains
+     *         the normalized search text. If the search text is empty, the predicate allows all movies to pass through.
      */
     private Predicate<Movie> filterBySearchText(String searchText) {
         return movie -> searchText.isEmpty() ||
-                movie.getTitleLowercaseNormalized().contains(normalize(searchText)) ||
-                movie.getDescriptionLowercaseNormalized().contains(normalize(searchText));
+                movie.getTitleLowercaseNormalized().contains(normalizeString(searchText)) ||
+                movie.getDescriptionLowercaseNormalized().contains(normalizeString(searchText));
     }
 
-    private String normalize(String text) {
-        return Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("\\p{M}", "").toLowerCase();
-    }
 
     /**
      * Toggles the sort order of the movie list between ascending and descending.
@@ -165,6 +168,10 @@ public class HomeController implements Initializable {
         updateUIBasedOnFilterResults();
     }
 
+    /**
+     * Updates the UI based on the results of movie filtering. Controls the visibility of the movie list view
+     * and the "No movies found." label.
+     */
     private void updateUIBasedOnFilterResults() {
         boolean listIsEmpty = filteredMovies.isEmpty();
 
