@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.fhmdb;
+package at.ac.fhcampuswien.fhmdb.control;
 
 import at.ac.fhcampuswien.fhmdb.models.Genres;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
@@ -46,6 +46,10 @@ public class HomeController implements Initializable {
     private List<Movie> allMovies = Movie.initializeMovies();
     private ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
     private FilteredList<Movie> filteredMovies;
+
+    public ObservableList<Movie> getObservableMovies() {
+        return observableMovies;
+    }
 
     /**
      * Initializes the controller class. This method is automatically called
@@ -149,7 +153,7 @@ public class HomeController implements Initializable {
      *
      * @param comparator The comparator to use for sorting the movies.
      */
-    private void sortMovies(Comparator<Movie> comparator) {
+    public void sortMovies(Comparator<Movie> comparator) {
         FXCollections.sort(observableMovies, comparator);
     }
 
