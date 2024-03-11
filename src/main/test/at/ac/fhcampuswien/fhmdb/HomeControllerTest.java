@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 class HomeControllerTest {
 
@@ -76,6 +78,50 @@ class HomeControllerTest {
             assertTrue(ascendingComparator.compare(currentMovie, nextMovie) <= 0, "Movies are not sorted in ascending order");
         }
     }
+
+    @Test
+    public void test_Sorting_Ascending_EmptyList() {
+        // Clear the observable movies list
+        observableMovies.clear();
+
+        // Sort the empty list in ascending order
+        Comparator<Movie> ascendingComparator = Comparator.comparing(Movie::getTitle, String.CASE_INSENSITIVE_ORDER);
+        homeController.sortMovies(ascendingComparator);
+
+        // Ensure that the empty list remains empty after sorting
+        assertTrue(observableMovies.isEmpty(), "Empty list should remain empty after sorting");
+    }
+
+    @Test
+    public void test_Sorting_Descending() {
+        ObservableList<Movie> observableMovies = homeController.getObservableMovies();
+
+        // Sorting the movies in descending order by title
+        Comparator<Movie> descendingComparator = Comparator.comparing(Movie::getTitle, String.CASE_INSENSITIVE_ORDER).reversed();
+        homeController.sortMovies(descendingComparator);
+
+        // Check if movies are sorted in descending order
+        for (int i = 0; i < observableMovies.size() - 1; i++) {
+            Movie currentMovie = observableMovies.get(i);
+            Movie nextMovie = observableMovies.get(i + 1);
+            assertTrue(descendingComparator.compare(currentMovie, nextMovie) >= 0, "Movies are not sorted in descending order");
+        }
+    }
+
+    @Test
+    public void test_Sorting_Descending_EmptyList() {
+        // Clear the observable movies list
+        observableMovies.clear();
+
+        // Sort the empty list in descending order
+        Comparator<Movie> descendingComparator = Comparator.comparing(Movie::getTitle, String.CASE_INSENSITIVE_ORDER).reversed();
+        homeController.sortMovies(descendingComparator);
+
+        // Ensure that the empty list remains empty after sorting
+        assertTrue(observableMovies.isEmpty(), "Empty list should remain empty after sorting in descending order");
+    }
+
+
 
 
 }
