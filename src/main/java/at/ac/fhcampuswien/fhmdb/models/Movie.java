@@ -12,7 +12,6 @@ public class Movie {
     private String descriptionLowercaseNormalized;
 
     private final List<Genres> genres;
-    // TODO add more properties here
 
     public Movie(String title, String description, List<Genres> genres) {
         this.title = title;
