@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -23,7 +24,7 @@ class HomeControllerTest {
 
     private ObservableList<Movie> observableMovies;
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         homeController = new HomeController();
         observableMovies = FXCollections.observableArrayList(
         new Movie(
@@ -70,7 +71,7 @@ class HomeControllerTest {
     // ---------------- SORTING ---------------- \\
 
     @Test
-    public void test_Sorting_Ascending(){
+    void test_Sorting_Ascending(){
         ObservableList<Movie> observableMovies = homeController.getObservableMovies();
 
         // Sorting the movies in ascending order by title
@@ -86,7 +87,7 @@ class HomeControllerTest {
     }
 
     @Test
-    public void test_Sorting_Ascending_EmptyList() {
+    void test_Sorting_Ascending_EmptyList() {
         // Clear the observable movies list
         observableMovies.clear();
 
@@ -99,7 +100,7 @@ class HomeControllerTest {
     }
 
     @Test
-    public void test_Sorting_Descending() {
+    void test_Sorting_Descending() {
         ObservableList<Movie> observableMovies = homeController.getObservableMovies();
 
         // Sorting the movies in descending order by title
@@ -115,7 +116,7 @@ class HomeControllerTest {
     }
 
     @Test
-    public void test_Sorting_Descending_EmptyList() {
+    void test_Sorting_Descending_EmptyList() {
         // Clear the observable movies list
         observableMovies.clear();
 
@@ -134,72 +135,159 @@ class HomeControllerTest {
 
     // ----- SEARCH ----- \\
     @Test
-    public void testFilterBySearchText_ExactMatch() {
+    void testFilterBySearchText_ExactMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Interstellar");
         assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
     }
 
     @Test
-    public void testFilterBySearchText_CaseInsensitiveMatch() {
+
+    void testFilterBySearchText_CaseInsensitiveMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("interstellar");
         assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
     }
 
     @Test
-    public void testFilterBySearchText_PartialMatch() {
+    void testFilterBySearchText_PartialMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Inter");
         assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
     }
 
     @Test
-    public void testFilterBySearchText_NoMatch() {
+    void testFilterBySearchText_NoMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Random");
         assertFalse(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
     }
 
     @Test
-    public void testFilterBySearchText_SpecialCharacters() {
+    void testFilterBySearchText_SpecialCharacters() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Intérstéllar");
         assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
     }
 
     @Test
-    public void testFilterBySearchText_EmptyString() {
+    void testFilterBySearchText_EmptyString() {
         Predicate<Movie> predicate = homeController.filterBySearchText("");
         assertTrue(predicate.test(new Movie("AnyMovie", "Description", Arrays.asList())));
     }
 
     @Test
-    public void testFilterBySearchText_MultipleWordsMatch() {
+    void testFilterBySearchText_MultipleWordsMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Interstellar future");
         assertTrue(predicate.test(new Movie("Interstellar", "Set in a dystopian future", Arrays.asList())), "Should match movies containing all search terms across title and description");
     }
 
     @Test
-    public void testFilterBySearchText_TrimSpaces() {
+    void testFilterBySearchText_TrimSpaces() {
         Predicate<Movie> predicate = homeController.filterBySearchText("  Interstellar   ");
         assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())), "Search should ignore leading and trailing spaces");
     }
 
     @Test
-    public void testFilterBySearchText_SpecialCharactersInTitle() {
+    void testFilterBySearchText_SpecialCharactersInTitle() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Intérstéllar");
         assertTrue(predicate.test(new Movie("Intérstéllar", "A futuristic space adventure", Arrays.asList())), "Should match titles with special characters");
     }
 
     @Test
-    public void testFilterBySearchText_NonAlphanumericCharacters() {
+    void testFilterBySearchText_NonAlphanumericCharacters() {
         Predicate<Movie> predicate = homeController.filterBySearchText("!@#$%");
         assertFalse(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())), "Non-alphanumeric search query should ideally not match standard movie titles");
     }
 
     @Test
-    public void testFilterBySearchText_IgnoreAccentsOption() {
+    void testFilterBySearchText_IgnoreAccentsOption() {
         Predicate<Movie> predicate = homeController.filterBySearchText("E");
         assertTrue(predicate.test(new Movie("Épic", "An epic adventure", Arrays.asList())), " 'E' should match 'É' in titles");
     }
 
 
+    // ----- BY GENRE ----- \\
+    @Test
+    void filterByGenre_COMEDY_shouldFilter_SpongeBobSquarePants_and_OnePiecefilmred() {
+        //Given
+        homeController = new HomeController();
+        Predicate<Movie> movieTest = homeController.filterByGenre("COMEDY");
+        List<Movie> actual = new ArrayList<>();
+        List<Movie> expected = Arrays.asList(
+                new Movie("SpongeBob SquarePants", "", Arrays.asList(Genres.ACTION)),
+                new Movie("One Piece film red", "", Arrays.asList(Genres.ACTION)));
+
+        //When
+        for (Movie m : homeController.allMovies) {
+            if (movieTest.test(m)) actual.add(m);
+        }
+
+        //Then
+        assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getTitle(), actual.get(i).getTitle());
+        }
+    }
+
+    @Test
+    void filterByGenre_ACTION_shouldFilter_Interstellar_and_SpongeBobSquarePants_and_Avatar_and_OnePiecefilmred() {
+        //Given
+        homeController = new HomeController();
+        Predicate<Movie> movieTest = homeController.filterByGenre("ACTION");
+        List<Movie> actual = new ArrayList<>();
+        List<Movie> expected = Arrays.asList(
+                new Movie("Interstellar", "", Arrays.asList(Genres.ACTION)),
+                new Movie("SpongeBob SquarePants", "", Arrays.asList(Genres.ACTION)),
+                new Movie("Avatar", "", Arrays.asList(Genres.ACTION)),
+                new Movie("One Piece film red", "", Arrays.asList(Genres.ACTION)));
+
+        //When
+        for (Movie m : homeController.allMovies) {
+            if (movieTest.test(m)) actual.add(m);
+        }
+
+        //Then
+        assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getTitle(), actual.get(i).getTitle());
+        }
+    }
+
+    @Test
+    void filterByGenre_BIOGRAPHY_shouldFilter_TheWolfofWallStreet() {
+        //Given
+        homeController = new HomeController();
+        Predicate<Movie> movieTest = homeController.filterByGenre("BIOGRAPHY");
+        List<Movie> actual = new ArrayList<>();
+        List<Movie> expected = Arrays.asList(
+                new Movie("The Wolf of Wall Street", "", Arrays.asList(Genres.ACTION)));
+
+        //When
+        for (Movie m : homeController.allMovies) {
+            if (movieTest.test(m)) actual.add(m);
+        }
+
+        //Then
+        assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getTitle(), actual.get(i).getTitle());
+        }
+    }
+
+    @Test
+    void filterByGenre_MYSTERY_should_filter_TheUsualSuspects() {
+        //Given
+        homeController = new HomeController();
+        Predicate<Movie> movieTest = homeController.filterByGenre("MYSTERY");
+        List<Movie> actual = new ArrayList<>();
+        List<Movie> expected = Arrays.asList(new Movie("The Usual Suspects", "", Arrays.asList(Genres.ACTION)));
 
 
+        //When
+        for (Movie m : homeController.allMovies) {
+            if (movieTest.test(m)) actual.add(m);
+        }
+
+        //Then
+        assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getTitle(), actual.get(i).getTitle());
+        }
+    }
 }
