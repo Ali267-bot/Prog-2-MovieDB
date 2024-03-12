@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.fhmdb;
+package at.ac.fhcampuswien.fhmdb.control;
 
 import at.ac.fhcampuswien.fhmdb.control.HomeController;
 import at.ac.fhcampuswien.fhmdb.models.Genres;
@@ -200,6 +200,8 @@ class HomeControllerTest {
         Predicate<Movie> predicate = homeController.filterBySearchText("E");
         assertTrue(predicate.test(new Movie("Épic", "An epic adventure", Arrays.asList())), " 'E' should match 'É' in titles");
     }
+
+
 
 
     // ----- BY GENRE ----- \\

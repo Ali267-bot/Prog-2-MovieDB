@@ -9,6 +9,7 @@ import com.jfoenix.controls.JFXListView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -114,7 +115,7 @@ public class HomeController implements Initializable {
      * @param selectedGenre The genre to filter by.
      * @return A predicate that returns true for movies that match the selected genre.
      */
-    public Predicate<Movie> filterByGenre(String selectedGenre) {
+    protected Predicate<Movie> filterByGenre(String selectedGenre) {
         return movie -> selectedGenre == null || selectedGenre.isEmpty() || movie.getGenres().stream().anyMatch(g -> g.name().equals(selectedGenre));
     }
 
@@ -128,7 +129,7 @@ public class HomeController implements Initializable {
      * @return A predicate that evaluates to {@code true} for movies where the normalized title or description contains
      *         the normalized search text. If the search text is empty, the predicate allows all movies to pass through.
      */
-    public Predicate<Movie> filterBySearchText(String searchText) {
+    protected Predicate<Movie> filterBySearchText(String searchText) {
         if (searchText.trim().isEmpty()) {
             return movie -> true;
         }
@@ -189,6 +190,7 @@ public class HomeController implements Initializable {
     /**
      * Updates the UI based on the results of movie filtering. Controls the visibility of the movie list view
      * and the "No movies found." label.
+     * setUIVisibility
      */
     private void updateUIBasedOnFilterResults() {
         boolean listIsEmpty = filteredMovies.isEmpty();
@@ -211,5 +213,4 @@ public class HomeController implements Initializable {
         boolean isGenreSelected = genreComboBox.getSelectionModel().getSelectedItem() != null;
         clearBtn.setVisible(isSearchFilled || isGenreSelected);
     }
-
 }

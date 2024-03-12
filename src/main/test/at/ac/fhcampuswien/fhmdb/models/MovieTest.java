@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.fhmdb;
+package at.ac.fhcampuswien.fhmdb.models;
 
 import static org.junit.jupiter.api.Assertions.*;
 
