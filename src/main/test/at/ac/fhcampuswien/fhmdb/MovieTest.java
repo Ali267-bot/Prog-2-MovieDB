@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 class MovieTest {
-    List<Movie> getListofMovies() {
+    private List<Movie> getListofMovies() {
         List<Movie> expected = new ArrayList<>();
 
         expected.add(new Movie(
