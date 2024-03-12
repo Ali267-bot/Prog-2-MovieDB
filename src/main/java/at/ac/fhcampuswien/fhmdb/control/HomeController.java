@@ -43,7 +43,7 @@ public class HomeController implements Initializable {
 
 
     private boolean isAscending = true;
-    private List<Movie> allMovies = Movie.initializeMovies();
+    public List<Movie> allMovies = Movie.initializeMovies();
     private ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
     public FilteredList<Movie> filteredMovies;
 
