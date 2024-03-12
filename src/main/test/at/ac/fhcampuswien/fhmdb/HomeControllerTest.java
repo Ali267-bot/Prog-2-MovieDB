@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 class HomeControllerTest {
@@ -131,7 +132,72 @@ class HomeControllerTest {
 
     // ---------------- FILTERING ---------------- \\
 
+    // ----- SEARCH ----- \\
+    @Test
+    public void testFilterBySearchText_ExactMatch() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("Interstellar");
+        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+    }
 
+    @Test
+    public void testFilterBySearchText_CaseInsensitiveMatch() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("interstellar");
+        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+    }
+
+    @Test
+    public void testFilterBySearchText_PartialMatch() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("Inter");
+        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+    }
+
+    @Test
+    public void testFilterBySearchText_NoMatch() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("Random");
+        assertFalse(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+    }
+
+    @Test
+    public void testFilterBySearchText_SpecialCharacters() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("Intérstéllar");
+        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+    }
+
+    @Test
+    public void testFilterBySearchText_EmptyString() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("");
+        assertTrue(predicate.test(new Movie("AnyMovie", "Description", Arrays.asList())));
+    }
+
+    @Test
+    public void testFilterBySearchText_MultipleWordsMatch() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("Interstellar future");
+        assertTrue(predicate.test(new Movie("Interstellar", "Set in a dystopian future", Arrays.asList())), "Should match movies containing all search terms across title and description");
+    }
+
+    @Test
+    public void testFilterBySearchText_TrimSpaces() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("  Interstellar   ");
+        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())), "Search should ignore leading and trailing spaces");
+    }
+
+    @Test
+    public void testFilterBySearchText_SpecialCharactersInTitle() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("Intérstéllar");
+        assertTrue(predicate.test(new Movie("Intérstéllar", "A futuristic space adventure", Arrays.asList())), "Should match titles with special characters");
+    }
+
+    @Test
+    public void testFilterBySearchText_NonAlphanumericCharacters() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("!@#$%");
+        assertFalse(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())), "Non-alphanumeric search query should ideally not match standard movie titles");
+    }
+
+    @Test
+    public void testFilterBySearchText_IgnoreAccentsOption() {
+        Predicate<Movie> predicate = homeController.filterBySearchText("E");
+        assertTrue(predicate.test(new Movie("Épic", "An epic adventure", Arrays.asList())), " 'E' should match 'É' in titles");
+    }
 
 
 

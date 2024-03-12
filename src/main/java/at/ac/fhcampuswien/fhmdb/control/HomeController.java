@@ -129,10 +129,22 @@ public class HomeController implements Initializable {
      *         the normalized search text. If the search text is empty, the predicate allows all movies to pass through.
      */
     public Predicate<Movie> filterBySearchText(String searchText) {
-        return movie -> searchText.isEmpty() ||
-                movie.getTitleLowercaseNormalized().contains(normalizeString(searchText)) ||
-                movie.getDescriptionLowercaseNormalized().contains(normalizeString(searchText));
+        if (searchText.trim().isEmpty()) {
+            return movie -> true;
+        }
+
+        String normalizedSearchText = normalizeString(searchText);
+        List<String> searchWords = Arrays.asList(normalizedSearchText.split("\\s+"));
+
+        return movie -> {
+            String titleNormalized = movie.getTitleLowercaseNormalized();
+            String descriptionNormalized = movie.getDescriptionLowercaseNormalized();
+
+            return searchWords.stream()
+                    .allMatch(word -> titleNormalized.contains(word) || descriptionNormalized.contains(word));
+        };
     }
+
 
 
     /**
