@@ -114,7 +114,7 @@ public class HomeController implements Initializable {
      * @param selectedGenre The genre to filter by.
      * @return A predicate that returns true for movies that match the selected genre.
      */
-    private Predicate<Movie> filterByGenre(String selectedGenre) {
+    public Predicate<Movie> filterByGenre(String selectedGenre) {
         return movie -> selectedGenre == null || selectedGenre.isEmpty() || movie.getGenres().stream().anyMatch(g -> g.name().equals(selectedGenre));
     }
 
@@ -128,7 +128,7 @@ public class HomeController implements Initializable {
      * @return A predicate that evaluates to {@code true} for movies where the normalized title or description contains
      *         the normalized search text. If the search text is empty, the predicate allows all movies to pass through.
      */
-    private Predicate<Movie> filterBySearchText(String searchText) {
+    public Predicate<Movie> filterBySearchText(String searchText) {
         return movie -> searchText.isEmpty() ||
                 movie.getTitleLowercaseNormalized().contains(normalizeString(searchText)) ||
                 movie.getDescriptionLowercaseNormalized().contains(normalizeString(searchText));
