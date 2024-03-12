@@ -63,6 +63,11 @@ class HomeControllerTest {
 
     }
 
+
+
+
+    // ---------------- SORTING ---------------- \\
+
     @Test
     public void test_Sorting_Ascending(){
         ObservableList<Movie> observableMovies = homeController.getObservableMovies();
@@ -120,6 +125,12 @@ class HomeControllerTest {
         // Ensure that the empty list remains empty after sorting
         assertTrue(observableMovies.isEmpty(), "Empty list should remain empty after sorting in descending order");
     }
+
+
+
+
+
+
 
 
 

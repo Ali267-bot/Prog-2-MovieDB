@@ -45,7 +45,7 @@ public class HomeController implements Initializable {
     private boolean isAscending = true;
     private List<Movie> allMovies = Movie.initializeMovies();
     private ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
-    private FilteredList<Movie> filteredMovies;
+    public FilteredList<Movie> filteredMovies;
 
     public ObservableList<Movie> getObservableMovies() {
         return observableMovies;
@@ -160,7 +160,7 @@ public class HomeController implements Initializable {
     /**
      * Applies the selected filters to the movie list.
      */
-    private void applyFilters() {
+    public void applyFilters() {
         String selectedGenre = genreComboBox.getSelectionModel().getSelectedItem();
         String searchText = searchField.getText().trim();
 
@@ -172,6 +172,8 @@ public class HomeController implements Initializable {
         updateUIBasedOnFilterResults();
     }
 
+
+
     /**
      * Updates the UI based on the results of movie filtering. Controls the visibility of the movie list view
      * and the "No movies found." label.
@@ -182,6 +184,8 @@ public class HomeController implements Initializable {
         movieListView.setVisible(!listIsEmpty);
         noMoviesLabel.setVisible(listIsEmpty);
     }
+
+
 
 
     /**
