@@ -3,9 +3,11 @@ package at.ac.fhcampuswien.fhmdb.control;
 import at.ac.fhcampuswien.fhmdb.models.Genres;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -15,11 +17,20 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
+import java.net.URI;
 import java.net.URL;
 import java.text.Normalizer;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static at.ac.fhcampuswien.fhmdb.models.Movie.normalizeString;
 
@@ -31,6 +42,12 @@ public class HomeController implements Initializable {
     public JFXButton searchBtn;
     @FXML
     public TextField searchField;
+
+    @FXML
+    public TextField releaseYearField;
+    @FXML
+    public TextField ratingField;
+
     @FXML
     public JFXListView<Movie> movieListView;
     @FXML
@@ -61,7 +78,8 @@ public class HomeController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        observableMovies.addAll(allMovies); // Populate the observable list with movies
+        fetchMovies("", "", "", "");
+        // observableMovies.addAll(allMovies); Nicht mehr nötig, weil API
         filteredMovies = new FilteredList<>(observableMovies, p -> true); // Initialize filtered list with a predicate that allows everything
 
         setupListView();
@@ -70,7 +88,70 @@ public class HomeController implements Initializable {
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
         genreComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
+        releaseYearField.textProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
+        ratingField.textProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
+
     }
+
+
+    /**
+     * Fetches movies from a remote source and adds them to the observable list.
+     * If query and genre parameters are provided, it appends them to the URL as query parameters.
+     *
+     * @param query Optional. The search query input by the user. If null or empty, it is ignored.
+     * @param genre Optional. The genre selected by the user. If null or empty, it is ignored.
+     */
+    private void fetchMovies(String query, String genre, String releaseYear, String rating) {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            URIBuilder uriBuilder = new URIBuilder("https://prog2.fh-campuswien.ac.at/movies");
+
+            if (query != null && !query.isEmpty()) {
+                uriBuilder.addParameter("query", query);
+            }
+            if (genre != null && !genre.isEmpty()) {
+                uriBuilder.addParameter("genre", genre);
+            }
+            if (releaseYear != null && !releaseYear.isEmpty()) {
+                uriBuilder.addParameter("releaseYear", releaseYear);
+            }
+            if (rating != null && !rating.isEmpty()) {
+                uriBuilder.addParameter("ratingFrom", rating);
+            }
+
+            URI uri = uriBuilder.build();
+            HttpGet request = new HttpGet(uri);
+
+            String jsonResponse = client.execute(request, httpResponse -> EntityUtils.toString(httpResponse.getEntity()));
+
+            ObjectMapper mapper = new ObjectMapper();
+            List<Map<String, Object>> moviesData = mapper.readValue(jsonResponse, new TypeReference<>() {});
+
+            Platform.runLater(observableMovies::clear);
+
+            moviesData.forEach(m -> {
+                String id = (String) m.get("id");
+                String title = (String) m.get("title");
+                String description = (String) m.get("description");
+                String imgUrl = (String) m.get("imgUrl");
+                int releaseYear_api = (int) m.get("releaseYear");
+                double rating_api = (double) m.get("rating");
+                List<String> genresStr = (List<String>) m.get("genres");
+                List<String> mainCast = (List<String>) m.get("mainCast"); // Assuming the JSON has a 'mainCast' field
+                Set<String> directors = new HashSet<>((List<String>) m.get("directors")); // Assuming the JSON has a 'directors' field
+                List<Genres> genres = genresStr.stream().map(Genres::valueOf).collect(Collectors.toList());
+
+                // Updated Movie constructor with mainCast and directors
+                Movie movie = new Movie(id, title, description, genres, imgUrl, releaseYear_api, rating_api, mainCast, directors);
+                Platform.runLater(() -> observableMovies.add(movie));
+            });
+
+            System.out.println("API Call Performed!");
+            System.out.println("URL Used: " + uri.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * Configures the Movie ListView, including its cell factory.
@@ -96,7 +177,9 @@ public class HomeController implements Initializable {
 
     /**
      * Sets up the action handlers for the interactive UI elements.
-     */
+     *
+     * OLD
+     *
     private void setupActionHandlers() {
         searchBtn.setOnAction(actionEvent -> applyFilters());
         sortBtn.setOnAction(actionEvent -> toggleSortOrder());
@@ -108,6 +191,26 @@ public class HomeController implements Initializable {
         });
 
     }
+     */
+
+    private void setupActionHandlers() {
+        searchBtn.setOnAction(actionEvent -> {
+            String userInput = searchField.getText().trim();
+            String selectedGenre = genreComboBox.getSelectionModel().getSelectedItem();
+            String releaseYearInput = releaseYearField.getText().trim();
+            String ratingInput = ratingField.getText().trim();
+
+            fetchMovies(userInput, selectedGenre, releaseYearInput, ratingInput);
+        });
+
+        sortBtn.setOnAction(actionEvent -> toggleSortOrder());
+        clearBtn.setOnAction(actionEvent -> {
+            searchField.setText("");
+            genreComboBox.getSelectionModel().clearSelection();
+            fetchMovies("", "","", "");
+        });
+    }
+
 
     /**
      * Filters the list of movies by genre.
@@ -211,6 +314,45 @@ public class HomeController implements Initializable {
     private void updateClearButtonVisibility() {
         boolean isSearchFilled = !searchField.getText().trim().isEmpty();
         boolean isGenreSelected = genreComboBox.getSelectionModel().getSelectedItem() != null;
-        clearBtn.setVisible(isSearchFilled || isGenreSelected);
+        boolean isReleaseYearFilled = !releaseYearField.getText().trim().isEmpty();
+        boolean isRatingFilled = !ratingField.getText().trim().isEmpty();
+
+        clearBtn.setVisible(isSearchFilled || isGenreSelected || isReleaseYearFilled || isRatingFilled);
+
     }
+
+
+    /**
+        UNTESTED
+     */
+    public String getMostPopularActor(List<Movie> movies) {
+        return movies.stream()
+                .flatMap(movie -> movie.getMainCast().stream())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
+
+    public int getLongestMovieTitle(List<Movie> movies) {
+        return movies.stream()
+                .map(Movie::getTitle)
+                .mapToInt(String::length)
+                .max()
+                .orElse(0);
+    }
+
+    public long countMoviesFrom(List<Movie> movies, String director) {
+        return movies.stream()
+                .filter(movie -> movie.getDirectors().contains(director))
+                .count();
+    }
+
+    public List<Movie> getMoviesBetweenYears(List<Movie> movies, int startYear, int endYear) {
+        return movies.stream()
+                .filter(movie -> movie.getReleaseYear() >= startYear && movie.getReleaseYear() <= endYear)
+                .collect(Collectors.toList());
+    }
+
 }
