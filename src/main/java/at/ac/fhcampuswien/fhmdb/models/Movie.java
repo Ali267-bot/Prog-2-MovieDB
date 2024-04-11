@@ -1,13 +1,16 @@
 package at.ac.fhcampuswien.fhmdb.models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.text.Normalizer;
 import java.util.*;
 
 public class Movie {
     private String title;
     private String description;
-    private String titleLowercaseNormalized;
-    private String descriptionLowercaseNormalized;
+    private transient String titleLowercaseNormalized;
+    private transient String descriptionLowercaseNormalized;
 
     private final List<Genres> genres;
 
@@ -21,19 +24,27 @@ public class Movie {
     private List<String> mainCast;
     private Set<String> directors;
 
-    public Movie(String id, String title, String description, List<Genres> genres, String imgUrl, int releaseYear, double rating, List<String> mainCast, Set<String> directors) {
+    @JsonCreator
+    public Movie(@JsonProperty("id") String id,
+                 @JsonProperty("title") String title,
+                 @JsonProperty("description") String description,
+                 @JsonProperty("genres") List<Genres> genres,
+                 @JsonProperty("imgUrl") String imgUrl,
+                 @JsonProperty("releaseYear") int releaseYear,
+                 @JsonProperty("rating") double rating,
+                 @JsonProperty("mainCast") List<String> mainCast,
+                 @JsonProperty("directors") Set<String> directors) {
+        this.id = id;
         this.title = title;
         this.description = description;
-        this.titleLowercaseNormalized = normalizeString(title);
-        this.descriptionLowercaseNormalized = normalizeString(description);
-        this.genres = genres;
-
-        this.id = id;
+        this.genres = genres == null ? Collections.emptyList() : genres;
         this.imgUrl = imgUrl;
         this.releaseYear = releaseYear;
         this.rating = rating;
-        this.mainCast = mainCast;
-        this.directors = directors;
+        this.mainCast = mainCast == null ? Collections.emptyList() : mainCast;
+        this.directors = directors == null ? Collections.emptySet() : directors;
+        this.titleLowercaseNormalized = normalizeString(title);
+        this.descriptionLowercaseNormalized = normalizeString(description);
     }
 
     public String getTitleLowercaseNormalized() {

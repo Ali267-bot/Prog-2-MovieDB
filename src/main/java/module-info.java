@@ -7,7 +7,9 @@ module at.ac.fhcampuswien.fhmdb {
     requires org.apache.httpcomponents.httpcore;
     requires com.fasterxml.jackson.databind;
 
+    opens at.ac.fhcampuswien.fhmdb.models to com.fasterxml.jackson.databind;
     opens at.ac.fhcampuswien.fhmdb to javafx.fxml;
     exports at.ac.fhcampuswien.fhmdb.control to javafx.fxml;
     exports at.ac.fhcampuswien.fhmdb;
+
 }

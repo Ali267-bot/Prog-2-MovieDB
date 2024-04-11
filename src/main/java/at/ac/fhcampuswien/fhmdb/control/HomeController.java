@@ -4,6 +4,7 @@ import at.ac.fhcampuswien.fhmdb.models.Genres;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
@@ -11,7 +12,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -19,7 +19,6 @@ import javafx.scene.control.TextField;
 
 import java.net.URI;
 import java.net.URL;
-import java.text.Normalizer;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -94,63 +93,68 @@ public class HomeController implements Initializable {
     }
 
 
+
     /**
-     * Fetches movies from a remote source and adds them to the observable list.
-     * If query and genre parameters are provided, it appends them to the URL as query parameters.
+     * Fetches movies from a remote source and updates the observable list with the fetched movies.
+     * This method constructs a URI with optional query parameters for search query, genre, release year,
+     * and minimum rating if they are provided (not null or empty), then makes an HTTP GET request to the specified URL.
+     * The response is deserialized into a list of Movie objects, which is then used to update the observable list on the JavaFX Application Thread.
+     * Also, logs the results and the URL used for the API call.
      *
      * @param query Optional. The search query input by the user. If null or empty, it is ignored.
      * @param genre Optional. The genre selected by the user. If null or empty, it is ignored.
+     * @param releaseYear Optional. The release year specified by the user. If null or empty, it is ignored.
+     * @param rating Optional. The minimum rating specified by the user. If null or empty, it is ignored.
      */
     private void fetchMovies(String query, String genre, String releaseYear, String rating) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             URIBuilder uriBuilder = new URIBuilder("https://prog2.fh-campuswien.ac.at/movies");
 
-            if (query != null && !query.isEmpty()) {
-                uriBuilder.addParameter("query", query);
-            }
-            if (genre != null && !genre.isEmpty()) {
-                uriBuilder.addParameter("genre", genre);
-            }
-            if (releaseYear != null && !releaseYear.isEmpty()) {
-                uriBuilder.addParameter("releaseYear", releaseYear);
-            }
-            if (rating != null && !rating.isEmpty()) {
-                uriBuilder.addParameter("ratingFrom", rating);
-            }
+            Map<String, String> params = new HashMap<>();
+            params.put("query", query);
+            params.put("genre", genre);
+            params.put("releaseYear", releaseYear);
+            params.put("ratingFrom", rating);
+
+            params.forEach((key, value) -> addParameterIfPresent(uriBuilder, key, value));
 
             URI uri = uriBuilder.build();
             HttpGet request = new HttpGet(uri);
-
             String jsonResponse = client.execute(request, httpResponse -> EntityUtils.toString(httpResponse.getEntity()));
-
             ObjectMapper mapper = new ObjectMapper();
-            List<Map<String, Object>> moviesData = mapper.readValue(jsonResponse, new TypeReference<>() {});
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            List<Movie> moviesData = mapper.readValue(jsonResponse, new TypeReference<>() {});
 
-            Platform.runLater(observableMovies::clear);
-
-            moviesData.forEach(m -> {
-                String id = (String) m.get("id");
-                String title = (String) m.get("title");
-                String description = (String) m.get("description");
-                String imgUrl = (String) m.get("imgUrl");
-                int releaseYear_api = (int) m.get("releaseYear");
-                double rating_api = (double) m.get("rating");
-                List<String> genresStr = (List<String>) m.get("genres");
-                List<String> mainCast = (List<String>) m.get("mainCast"); // Assuming the JSON has a 'mainCast' field
-                Set<String> directors = new HashSet<>((List<String>) m.get("directors")); // Assuming the JSON has a 'directors' field
-                List<Genres> genres = genresStr.stream().map(Genres::valueOf).collect(Collectors.toList());
-
-                // Updated Movie constructor with mainCast and directors
-                Movie movie = new Movie(id, title, description, genres, imgUrl, releaseYear_api, rating_api, mainCast, directors);
-                Platform.runLater(() -> observableMovies.add(movie));
+            Platform.runLater(() -> {
+                observableMovies.setAll(moviesData);
+                logResults(moviesData);
             });
 
-            System.out.println("API Call Performed!");
-            System.out.println("URL Used: " + uri.toString());
+            System.out.printf("Performing API Call!\nURL Used: %s\n", uri);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    private void addParameterIfPresent(URIBuilder builder, String paramName, String paramValue) {
+        if (paramValue != null && !paramValue.isEmpty()) {
+            builder.addParameter(paramName, paramValue);
+        }
+    }
+
+    private void logResults(List<Movie> movies) {
+        String mostPopularActor = getMostPopularActor(movies);
+        int longestMovieTitleLength = getLongestMovieTitle(movies);
+
+        final String ANSI_CYAN = "\u001B[36m";
+        final String ANSI_RESET = "\u001B[0m";
+
+        System.out.println("Most Popular Actor: " + ANSI_CYAN + mostPopularActor + ANSI_RESET);
+        System.out.println("Longest Movie Title Length: " + ANSI_CYAN + longestMovieTitleLength + ANSI_RESET);
+    }
+
+
+
 
 
     /**
@@ -322,9 +326,7 @@ public class HomeController implements Initializable {
     }
 
 
-    /**
-        UNTESTED
-     */
+
     public String getMostPopularActor_nodebug(List<Movie> movies) {
         return movies.stream()
                 .flatMap(movie -> movie.getMainCast().stream())
