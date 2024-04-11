@@ -96,7 +96,7 @@ class HomeControllerTest {
                                 " other because Uta is the adopted daughter of \"Red-Haired\" Shanks.",
                         Arrays.asList(Genres.ADVENTURE, Genres.COMEDY, Genres.ACTION),
                         "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-                        2014,
+                        2018,
                         8.6,
                         Arrays.asList("Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"), // mainCast
                         new HashSet<>(Arrays.asList("Christopher Nolan"))
@@ -402,88 +402,39 @@ class HomeControllerTest {
     }
 
     @Test
-    void testx() {
+    void getMostPopularActor_equals_JessicaChastain() {
         homeController = new HomeController();
 
+        assertEquals("Jessica Chastain", homeController.getMostPopularActor(observableMovies));
+    }
 
-        List<Movie> movies = new ArrayList<>();
+    @Test
+    void getLongestMovieTitle_equals_23() {
+        homeController = new HomeController();
 
-        movies.add(new Movie(
-                        "ID",
-                        "Interstellar",
-                        "Set in a dystopian future where humanity is embroiled in a catastrophic blight " +
-                                "and famine, the film follows a group of astronauts who travel through a wormhole " +
-                                "near Saturn in search of a new home for humankind.",
-                        Arrays.asList(Genres.SCIENCE_FICTION, Genres.ACTION, Genres.ADVENTURE),
-                        "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-                        2014,
-                        8.6,
-                        Arrays.asList("Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"), // mainCast
-                        new HashSet<>(Arrays.asList("Christopher Nolan"))
-                )
-        );
-        movies.add(new Movie(
-                "ID",
-                "SpongeBob SquarePants",
-                "After King Neptune's crown is stolen, SpongeBob and Patrick go on a quest in 6 " +
-                        "days to retrieve his crown. On the way SpongeBob and Patrick defeat many evildoers " +
-                        "using their brains and bronzes.",
-                Arrays.asList(Genres.COMEDY, Genres.ACTION, Genres.ADVENTURE),
-                "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-                2014,
-                8.6,
-                Arrays.asList("Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"), // mainCast
-                new HashSet<>(Arrays.asList("Christopher Nolan"))
-        ));
-        movies.add(new Movie(
-                "ID",
-                "The Usual Suspects",
-                "A sole survivor tells of the twisty events leading up to a horrific gun battle on" +
-                        " a boat, which begin when five criminals meet at a seemingly random police lineup.",
-                Arrays.asList(Genres.CRIME, Genres.DRAMA, Genres.MYSTERY),
-                "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-                2014,
-                8.6,
-                Arrays.asList("Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"), // mainCast
-                new HashSet<>(Arrays.asList("Christopher Nolan"))));
-        movies.add(new Movie(
-                "ID",
-                "The Wolf of Wall Street",
-                "Based on the true story of Jordan Belfort, from his rise to a wealthy stock-broker" +
-                        " living the high life to his fall involving crime, corruption and the federal government.",
-                Arrays.asList(Genres.DRAMA, Genres.ROMANCE, Genres.BIOGRAPHY),
-                "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-                2014,
-                8.6,
-                Arrays.asList("Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"), // mainCast
-                new HashSet<>(Arrays.asList("Christopher Nolan"))));
-        movies.add(new Movie(
-                "ID",
-                "Avatar",
-                "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn " +
-                        "between following his orders and protecting the world he feels is his home. äää",
-                Arrays.asList(Genres.ANIMATION, Genres.DRAMA, Genres.ACTION),
-                "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-                2014,
-                8.6,
-                Arrays.asList("Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"), // mainCast
-                new HashSet<>(Arrays.asList("Christopher Nolan"))));
-        movies.add(new Movie(
-                "ID",
-                "One Piece film red",
-                "The Straw Hat Pirates leave for the island of Elegia to attend a concert by Uta," +
-                        " a world-famous singer. After Uta performs her first song (\"New Genesis\"), Luffy" +
-                        " goes on stage to reunite with her, revealing that the two of them know each" +
-                        " other because Uta is the adopted daughter of \"Red-Haired\" Shanks.",
-                Arrays.asList(Genres.ADVENTURE, Genres.COMEDY, Genres.ACTION),
-                "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-                2014,
-                8.6,
-                Arrays.asList("Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"), // mainCast
-                new HashSet<>(Arrays.asList("Christopher Nolan"))
-        ));
+        assertEquals(23, homeController.getLongestMovieTitle(observableMovies));
+    }
 
+    @Test
+    void countMoviesFrom_ChristopherNolan_equals_6() {
+        homeController = new HomeController();
 
-        assertEquals("Jessica Chastain", homeController.getMostPopularActor(movies));
+        assertEquals(6, homeController.countMoviesFrom(observableMovies, "Christopher Nolan"));
+    }
+
+    @Test
+    void getMoviesBetweenYears_2013_to_2016_equals_Interstellar_SpongeBobSquarePants_TheUsualSuspects_TheWolfofWallStreet_Avatar() {
+        homeController = new HomeController();
+
+        List<Movie> actual = homeController.getMoviesBetweenYears(observableMovies, 2013, 2016);
+
+        List<Movie> expected = observableMovies;
+        expected.remove(5);
+
+        assertEquals(expected.size(), actual.size());
+
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getTitle(), actual.get(i).getTitle());
+        }
     }
 }
