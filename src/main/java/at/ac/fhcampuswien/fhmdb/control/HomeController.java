@@ -341,6 +341,11 @@ public class HomeController implements Initializable {
                 .orElse(null);
     }
 
+    /**
+     * gibt jene Person zurück, die am öftesten im mainCast der übergebenen Filme vorkommt
+     * @param movies eine Liste von Movies, in denen gesucht werden soll
+     * @return die Person als String
+     */
     public String getMostPopularActor(List<Movie> movies) {
         System.out.println("--------- getMostPopularActor ---------");
         Map<String, Long> actorOccurrences = movies.stream()
@@ -365,6 +370,11 @@ public class HomeController implements Initializable {
                 .orElse(0);
     }
 
+    /**
+     * filter auf den längsten Titel der übergebenen Filme und gibt die Anzahl der Buchstaben des Titels zurück
+     * @param movies eine Liste von Movies, in denen gesucht werden soll
+     * @return Anzahl der Buchstaben als int
+     */
     public int getLongestMovieTitle(List<Movie> movies) {
         System.out.println("--------- getLongestMovieTitle ---------");
         List<String> titles = movies.stream()
@@ -380,12 +390,25 @@ public class HomeController implements Initializable {
     }
 
 
+    /**
+     * gibt die Anzahl der Filme eines bestimmten Regisseurs zurück.
+     * @param movies eine Liste von Movies, in denen gesucht werden soll
+     * @param director der Name des Directors als String
+     * @return Anzahl der Filme als long
+     */
     public long countMoviesFrom(List<Movie> movies, String director) {
         return movies.stream()
                 .filter(movie -> movie.getDirectors().contains(director))
                 .count();
     }
 
+    /**
+     * gibt jene Filme zurück, die zwischen zwei gegebenen Jahren veröffentlicht wurden (beide inkl.)
+     * @param movies eine Liste von Movies, in denen gesucht werden soll
+     * @param startYear das Beginn-Jahr als int
+     * @param endYear das End-Jahr als int
+     * @return die gefilterten Filme als Liste von Movies
+     */
     public List<Movie> getMoviesBetweenYears(List<Movie> movies, int startYear, int endYear) {
         return movies.stream()
                 .filter(movie -> movie.getReleaseYear() >= startYear && movie.getReleaseYear() <= endYear)
