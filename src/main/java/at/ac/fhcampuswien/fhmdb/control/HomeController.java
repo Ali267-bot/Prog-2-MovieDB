@@ -68,6 +68,8 @@ public class HomeController implements Initializable {
         return observableMovies;
     }
 
+    private List<Movie> moviesData;
+
     /**
      * Initializes the controller class. This method is automatically called
      * after the fxml file has been loaded.
@@ -89,7 +91,6 @@ public class HomeController implements Initializable {
         genreComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
         releaseYearField.textProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
         ratingField.textProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
-
     }
 
 
@@ -123,7 +124,7 @@ public class HomeController implements Initializable {
             String jsonResponse = client.execute(request, httpResponse -> EntityUtils.toString(httpResponse.getEntity()));
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            List<Movie> moviesData = mapper.readValue(jsonResponse, new TypeReference<>() {});
+            moviesData = mapper.readValue(jsonResponse, new TypeReference<>() {});
 
             Platform.runLater(() -> {
                 observableMovies.setAll(moviesData);
@@ -131,6 +132,7 @@ public class HomeController implements Initializable {
             });
 
             System.out.printf("API call performing.\nURL Used: %s\n", uri);
+            updateUIBasedOnFilterResults();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -170,7 +172,7 @@ public class HomeController implements Initializable {
      */
     private void setupGenreComboBox() {
         genreComboBox.setPromptText("Filter by Genre");
-        Set<Genres> uniqueGenres = allMovies.stream()
+        Set<Genres> uniqueGenres = moviesData.stream()
                 .flatMap(movie -> movie.getGenres().stream())
                 .collect(Collectors.toSet());
         genreComboBox.getItems().addAll(uniqueGenres.stream()
@@ -210,6 +212,8 @@ public class HomeController implements Initializable {
         sortBtn.setOnAction(actionEvent -> toggleSortOrder());
         clearBtn.setOnAction(actionEvent -> {
             searchField.setText("");
+            ratingField.setText("");
+            releaseYearField.setText("");
             genreComboBox.getSelectionModel().clearSelection();
             fetchMovies("", "","", "");
         });
@@ -300,7 +304,7 @@ public class HomeController implements Initializable {
      * setUIVisibility
      */
     private void updateUIBasedOnFilterResults() {
-        boolean listIsEmpty = filteredMovies.isEmpty();
+        boolean listIsEmpty = moviesData.isEmpty();
 
         movieListView.setVisible(!listIsEmpty);
         noMoviesLabel.setVisible(listIsEmpty);
