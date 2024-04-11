@@ -11,10 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -28,39 +25,69 @@ class HomeControllerTest {
         homeController = new HomeController();
         observableMovies = FXCollections.observableArrayList(
         new Movie(
+                "1",
                 "Interstellar",
                 " Set in a dystopian future where humanity is embroiled in a catastrophic blight " +
                         "and famine, the film follows a group of astronauts who travel through a wormhole " +
                         "near Saturn in search of a new home for humankind.",
-                        Arrays.asList(Genres.SCIENCE_FICTION, Genres.ACTION, Genres.ADVENTURE)),
+                        Arrays.asList(Genres.SCIENCE_FICTION, Genres.ACTION, Genres.ADVENTURE),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>()),
         new Movie(
+                "2",
                 "SpongeBob SquarePants",
                 "After King Neptune's crown is stolen, SpongeBob and Patrick go on a quest in 6 " +
                         "days to retrieve his crown. On the way SpongeBob and Patrick defeat many evildoers " +
                         "using their brains and bronzes.",
-                Arrays.asList(Genres.COMEDY, Genres.ACTION, Genres.ADVENTURE)),
+                Arrays.asList(Genres.COMEDY, Genres.ACTION, Genres.ADVENTURE),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>()),
         new Movie(
+                "3",
                 "The Usual Suspects",
                 "A sole survivor tells of the twisty events leading up to a horrific gun battle on" +
                         " a boat, which begin when five criminals meet at a seemingly random police lineup.",
-                Arrays.asList(Genres.CRIME, Genres.DRAMA, Genres.MYSTERY)),
+                Arrays.asList(Genres.CRIME, Genres.DRAMA, Genres.MYSTERY),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>()),
         new Movie(
+                "4",
                 "The Wolf of Wall Street",
                 "Based on the true story of Jordan Belfort, from his rise to a wealthy stock-broker" +
                         " living the high life to his fall involving crime, corruption and the federal government.",
-                Arrays.asList(Genres.DRAMA, Genres.ROMANCE, Genres.BIOGRAPHY)),
+                Arrays.asList(Genres.DRAMA, Genres.ROMANCE, Genres.BIOGRAPHY),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>()),
         new Movie(
+                "5",
                 "Avatar",
                 "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn " +
                         "between following his orders and protecting the world he feels is his home. äää",
-                Arrays.asList(Genres.ANIMATION, Genres.DRAMA, Genres.ACTION)),
+                Arrays.asList(Genres.ANIMATION, Genres.DRAMA, Genres.ACTION),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>()),
         new Movie(
+                "6",
                 "One Piece film red",
                 "The Straw Hat Pirates leave for the island of Elegia to attend a concert by Uta," +
                         " a world-famous singer. After Uta performs her first song (\"New Genesis\"), Luffy" +
                         " goes on stage to reunite with her, revealing that the two of them know each" +
                         " other because Uta is the adopted daughter of \"Red-Haired\" Shanks.",
-                Arrays.asList(Genres.ADVENTURE, Genres.COMEDY, Genres.ACTION))
+                Arrays.asList(Genres.ADVENTURE, Genres.COMEDY, Genres.ACTION),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())
         );
 
     }
@@ -137,68 +164,112 @@ class HomeControllerTest {
     @Test
     void testFilterBySearchText_ExactMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Interstellar");
-        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+        assertTrue(predicate.test(new Movie("1","Interstellar", "Description", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())));
     }
 
     @Test
 
     void testFilterBySearchText_CaseInsensitiveMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("interstellar");
-        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+        assertTrue(predicate.test(new Movie("1","Interstellar", "Description", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())));
     }
 
     @Test
     void testFilterBySearchText_PartialMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Inter");
-        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+        assertTrue(predicate.test(new Movie("1","Interstellar", "Description", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())));
     }
 
     @Test
     void testFilterBySearchText_NoMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Random");
-        assertFalse(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+        assertFalse(predicate.test(new Movie("1","Interstellar", "Description", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())));
     }
 
     @Test
     void testFilterBySearchText_SpecialCharacters() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Intérstéllar");
-        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())));
+        assertTrue(predicate.test(new Movie("1","Interstellar", "Description", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())));
     }
 
     @Test
     void testFilterBySearchText_EmptyString() {
         Predicate<Movie> predicate = homeController.filterBySearchText("");
-        assertTrue(predicate.test(new Movie("AnyMovie", "Description", Arrays.asList())));
+        assertTrue(predicate.test(new Movie("1","AnyMovie", "Description", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())));
     }
 
     @Test
     void testFilterBySearchText_MultipleWordsMatch() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Interstellar future");
-        assertTrue(predicate.test(new Movie("Interstellar", "Set in a dystopian future", Arrays.asList())), "Should match movies containing all search terms across title and description");
+        assertTrue(predicate.test(new Movie("1","Interstellar", "Set in a dystopian future", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())), "Should match movies containing all search terms across title and description");
     }
 
     @Test
     void testFilterBySearchText_TrimSpaces() {
         Predicate<Movie> predicate = homeController.filterBySearchText("  Interstellar   ");
-        assertTrue(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())), "Search should ignore leading and trailing spaces");
+        assertTrue(predicate.test(new Movie("1","Interstellar", "Description", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())), "Search should ignore leading and trailing spaces");
     }
 
     @Test
     void testFilterBySearchText_SpecialCharactersInTitle() {
         Predicate<Movie> predicate = homeController.filterBySearchText("Intérstéllar");
-        assertTrue(predicate.test(new Movie("Intérstéllar", "A futuristic space adventure", Arrays.asList())), "Should match titles with special characters");
+        assertTrue(predicate.test(new Movie("1","Intérstéllar", "A futuristic space adventure", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())), "Should match titles with special characters");
     }
 
     @Test
     void testFilterBySearchText_NonAlphanumericCharacters() {
         Predicate<Movie> predicate = homeController.filterBySearchText("!@#$%");
-        assertFalse(predicate.test(new Movie("Interstellar", "Description", Arrays.asList())), "Non-alphanumeric search query should ideally not match standard movie titles");
+        assertFalse(predicate.test(new Movie("1","Interstellar", "Description", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())), "Non-alphanumeric search query should ideally not match standard movie titles");
     }
 
     @Test
     void testFilterBySearchText_IgnoreAccentsOption() {
         Predicate<Movie> predicate = homeController.filterBySearchText("E");
-        assertTrue(predicate.test(new Movie("Épic", "An epic adventure", Arrays.asList())), " 'E' should match 'É' in titles");
+        assertTrue(predicate.test(new Movie("1","Épic", "An epic adventure", Arrays.asList(),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>())), " 'E' should match 'É' in titles");
     }
 
 
@@ -212,8 +283,16 @@ class HomeControllerTest {
         Predicate<Movie> movieTest = homeController.filterByGenre("COMEDY");
         List<Movie> actual = new ArrayList<>();
         List<Movie> expected = Arrays.asList(
-                new Movie("SpongeBob SquarePants", "", Arrays.asList(Genres.ACTION)),
-                new Movie("One Piece film red", "", Arrays.asList(Genres.ACTION)));
+                new Movie("2","SpongeBob SquarePants", "", Arrays.asList(Genres.ACTION),
+                        "",
+                        1,
+                        0.0,
+                        new ArrayList<>(), new TreeSet<>()),
+                new Movie("6","One Piece film red", "", Arrays.asList(Genres.ACTION),
+                        "",
+                        1,
+                        0.0,
+                        new ArrayList<>(), new TreeSet<>()));
 
         //When
         for (Movie m : homeController.allMovies) {
@@ -234,10 +313,26 @@ class HomeControllerTest {
         Predicate<Movie> movieTest = homeController.filterByGenre("ACTION");
         List<Movie> actual = new ArrayList<>();
         List<Movie> expected = Arrays.asList(
-                new Movie("Interstellar", "", Arrays.asList(Genres.ACTION)),
-                new Movie("SpongeBob SquarePants", "", Arrays.asList(Genres.ACTION)),
-                new Movie("Avatar", "", Arrays.asList(Genres.ACTION)),
-                new Movie("One Piece film red", "", Arrays.asList(Genres.ACTION)));
+                new Movie("1","Interstellar", "", Arrays.asList(Genres.ACTION),
+                        "",
+                        1,
+                        0.0,
+                        new ArrayList<>(), new TreeSet<>()),
+                new Movie("2","SpongeBob SquarePants", "", Arrays.asList(Genres.ACTION),
+                        "",
+                        1,
+                        0.0,
+                        new ArrayList<>(), new TreeSet<>()),
+                new Movie("5","Avatar", "", Arrays.asList(Genres.ACTION),
+                        "",
+                        1,
+                        0.0,
+                        new ArrayList<>(), new TreeSet<>()),
+                new Movie("6","One Piece film red", "", Arrays.asList(Genres.ACTION),
+                        "",
+                        1,
+                        0.0,
+                        new ArrayList<>(), new TreeSet<>()));
 
         //When
         for (Movie m : homeController.allMovies) {
@@ -258,7 +353,11 @@ class HomeControllerTest {
         Predicate<Movie> movieTest = homeController.filterByGenre("BIOGRAPHY");
         List<Movie> actual = new ArrayList<>();
         List<Movie> expected = Arrays.asList(
-                new Movie("The Wolf of Wall Street", "", Arrays.asList(Genres.ACTION)));
+                new Movie("4","The Wolf of Wall Street", "", Arrays.asList(Genres.ACTION),
+                        "",
+                        1,
+                        0.0,
+                        new ArrayList<>(), new TreeSet<>()));
 
         //When
         for (Movie m : homeController.allMovies) {
@@ -278,7 +377,11 @@ class HomeControllerTest {
         homeController = new HomeController();
         Predicate<Movie> movieTest = homeController.filterByGenre("MYSTERY");
         List<Movie> actual = new ArrayList<>();
-        List<Movie> expected = Arrays.asList(new Movie("The Usual Suspects", "", Arrays.asList(Genres.ACTION)));
+        List<Movie> expected = Arrays.asList(new Movie("3","The Usual Suspects", "", Arrays.asList(Genres.ACTION),
+                "",
+                1,
+                0.0,
+                new ArrayList<>(), new TreeSet<>()));
 
 
         //When
