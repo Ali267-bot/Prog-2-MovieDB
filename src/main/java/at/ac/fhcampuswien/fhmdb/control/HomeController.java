@@ -130,7 +130,7 @@ public class HomeController implements Initializable {
                 logResults(moviesData);
             });
 
-            System.out.printf("Performing API Call!\nURL Used: %s\n", uri);
+            System.out.printf("API call performing.\nURL Used: %s\n", uri);
         } catch (Exception e) {
             e.printStackTrace();
         }
