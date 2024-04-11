@@ -442,4 +442,24 @@ class HomeControllerTest {
             assertEquals(expected.get(i).getTitle(), actual.get(i).getTitle());
         }
     }
+
+    @Test
+    void getMoviesBetweenYears_2016_to_2019_equals_OnePiecefilmred() {
+        homeController = new HomeController();
+
+        List<Movie> actual = homeController.getMoviesBetweenYears(observableMovies, 2016, 2019);
+
+        List<Movie> expected = observableMovies;
+        expected.remove(4);
+        expected.remove(3);
+        expected.remove(2);
+        expected.remove(1);
+        expected.remove(0);
+
+        assertEquals(expected.size(), actual.size());
+
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(expected.get(i).getTitle(), actual.get(i).getTitle());
+        }
+    }
 }
