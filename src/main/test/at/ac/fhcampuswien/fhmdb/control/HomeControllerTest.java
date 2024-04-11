@@ -98,7 +98,7 @@ class HomeControllerTest {
                         "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
                         2018,
                         8.6,
-                        Arrays.asList("Matthew McConaughey", "Jessica Chastain"), // mainCast
+                        Arrays.asList("Jessica Chastain"), // mainCast
                         new HashSet<>(Arrays.asList("Christopher Nolan"))
                 ));
 

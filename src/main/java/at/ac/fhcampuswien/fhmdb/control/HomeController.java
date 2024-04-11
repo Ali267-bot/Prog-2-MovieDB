@@ -325,7 +325,7 @@ public class HomeController implements Initializable {
     /**
         UNTESTED
      */
-    public String getMostPopularActor(List<Movie> movies) {
+    public String getMostPopularActor_nodebug(List<Movie> movies) {
         return movies.stream()
                 .flatMap(movie -> movie.getMainCast().stream())
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
@@ -335,13 +335,44 @@ public class HomeController implements Initializable {
                 .orElse(null);
     }
 
-    public int getLongestMovieTitle(List<Movie> movies) {
+    public String getMostPopularActor(List<Movie> movies) {
+        System.out.println("--------- getMostPopularActor ---------");
+        Map<String, Long> actorOccurrences = movies.stream()
+                .flatMap(movie -> movie.getMainCast().stream())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        actorOccurrences.forEach((actor, count) -> System.out.println(actor + " : " + count));
+        System.out.println();
+
+        return actorOccurrences.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
+
+
+    public int getLongestMovieTitle_nodebug(List<Movie> movies) {
         return movies.stream()
                 .map(Movie::getTitle)
                 .mapToInt(String::length)
                 .max()
                 .orElse(0);
     }
+
+    public int getLongestMovieTitle(List<Movie> movies) {
+        System.out.println("--------- getLongestMovieTitle ---------");
+        List<String> titles = movies.stream()
+                .map(Movie::getTitle)
+                .peek(title -> System.out.println(title + " : " + title.length()))
+                .collect(Collectors.toList());
+
+        System.out.println();
+        return titles.stream()
+                .mapToInt(String::length)
+                .max()
+                .orElse(0);
+    }
+
 
     public long countMoviesFrom(List<Movie> movies, String director) {
         return movies.stream()
