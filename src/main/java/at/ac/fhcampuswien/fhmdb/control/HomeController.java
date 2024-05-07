@@ -477,19 +477,25 @@ public class HomeController implements Initializable {
 
 
     public void handleWatchlist(ActionEvent actionEvent) {
-        mainContent.getChildren().remove(movieListView);
-        mainContent.getChildren().remove(noMoviesLabel);
-        mainContent.getChildren().remove(filters);
+        clearAll();
         mainContent.getChildren().add(createWatchlistVBox());
     }
 
-    private void handleHomeButtonAction() {
+    private void clearAll() {
         mainContent.getChildren().remove(watchlistVBox);
+        mainContent.getChildren().remove(movieListView);
+        mainContent.getChildren().remove(noMoviesLabel);
+        mainContent.getChildren().remove(filters);
+    }
+
+    private void handleHomeButtonAction() {
+        clearAll();
         mainContent.getChildren().addAll(filters, movieListView, noMoviesLabel);
     }
 
     // Helper method to create a VBox for the watchlist
     private VBox createWatchlistVBox() {
+
         watchlistVBox = new VBox();
         watchlistVBox.setStyle("-fx-background-color: #EEE; -fx-padding: 20;");
         Label titleLabel = new Label("My Watchlist");
@@ -498,8 +504,8 @@ public class HomeController implements Initializable {
         Label contentLabel = new Label("You currently have no movies saved to your watchlist.");
         contentLabel.setWrapText(true);
         VBox.setMargin(contentLabel, new Insets(10, 0, 0, 0));
-
         watchlistVBox.getChildren().addAll(titleLabel, contentLabel);
+
         return watchlistVBox;
     }
 }
