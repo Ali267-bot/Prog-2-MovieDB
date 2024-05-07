@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.fhmdb.db;
 
+import at.ac.fhcampuswien.fhmdb.exceptions.DatabaseException;
 import at.ac.fhcampuswien.fhmdb.models.MovieEntity;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
@@ -14,20 +15,20 @@ public class DatabaseManager {
 
     private ConnectionSource connectionSource;
 
-    public DatabaseManager() {
+    public DatabaseManager() throws DatabaseException.ConnectionException {
         try {
             connectionSource = new JdbcConnectionSource(DATABASE_URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DatabaseException.ConnectionException("Connection error" + e.getMessage(), e);
         }
     }
 
-    public void createTableIfNotExists() {
+    public void createTableIfNotExists() throws DatabaseException.OperationException {
         try {
             TableUtils.createTableIfNotExists(connectionSource, MovieEntity.class);
             System.out.println("Table created successfully.");
         } catch (SQLException e) {
-            System.err.println("Error creating table: " + e.getMessage());
+            throw new DatabaseException.OperationException("Error creating the table: " + e.getMessage(), e);
         }
     }
 
