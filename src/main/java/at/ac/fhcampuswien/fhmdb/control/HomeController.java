@@ -12,10 +12,10 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.net.URI;
 import java.net.URL;
@@ -24,6 +24,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -37,6 +43,11 @@ import static at.ac.fhcampuswien.fhmdb.models.Movie.normalizeString;
  * HomeController manages the UI logic for the Movie list and filter functionality.
  */
 public class HomeController implements Initializable {
+
+    @FXML
+    private HBox rootLayout;
+    @FXML
+    private VBox sidebar;
     @FXML
     public JFXButton searchBtn;
     @FXML
@@ -57,7 +68,8 @@ public class HomeController implements Initializable {
     public JFXButton clearBtn;
     @FXML
     public Label noMoviesLabel;
-
+    @FXML
+    public JFXButton menuButton;
 
     private boolean isAscending = true;
     public List<Movie> allMovies = Movie.initializeMovies();
@@ -415,4 +427,49 @@ public class HomeController implements Initializable {
                 .collect(Collectors.toList());
     }
 
+
+    private void initializeSidebar() {
+        sidebar = new VBox();
+        sidebar.setStyle("-fx-background-color: white; -fx-padding: 10;");
+        sidebar.setMinWidth(200);
+        sidebar.setFillWidth(true);
+
+        Button homeButton = new Button("Home");
+        Button watchlistButton = new Button("Watchlist");
+        Button aboutButton = new Button("About");
+
+        homeButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        watchlistButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        aboutButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+        VBox.setVgrow(homeButton, Priority.ALWAYS);
+        VBox.setVgrow(watchlistButton, Priority.ALWAYS);
+        VBox.setVgrow(aboutButton, Priority.ALWAYS);
+
+        sidebar.getChildren().addAll(homeButton, watchlistButton, aboutButton);
+    }
+
+    private boolean isSidebarInitialized = false;
+    public void handleMenuButtonAction() {
+        if (!isSidebarInitialized) {
+            initializeSidebar();
+            isSidebarInitialized = true;
+        }
+        // Check if the sidebar is currently visible by checking if it's part of the rootLayout's children
+        if (rootLayout.getChildren().contains(sidebar)) {
+            rootLayout.getChildren().remove(sidebar); // If visible, remove it, thus hiding the sidebar
+        } else {
+            rootLayout.getChildren().add(0, sidebar); // If not visible, add it to the beginning of the HBox, making it visible
+        }
+    }
+
+
+    public void handleHome(ActionEvent actionEvent) {
+    }
+
+    public void handleWatchlist(ActionEvent actionEvent) {
+    }
+
+    public void handleAbout(ActionEvent actionEvent) {
+    }
 }

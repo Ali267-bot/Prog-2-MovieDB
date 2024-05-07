@@ -44,3 +44,7 @@
     -fx-font-size: 16px;
     -fx-alignment: center;
 }
+
+.burger-menu-button {
+    -fx-background-color: #cdcdcd;
+}
