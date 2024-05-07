@@ -30,7 +30,7 @@
 }
 
 .movie-cell {
-    -fx-background-color: black;
+    -fx-background-color: #262626;
     -fx-padding: 2;
 }
 
@@ -48,3 +48,16 @@
 .burger-menu-button {
     -fx-background-color: #cdcdcd;
 }
+
+.button-watchlist {
+    -fx-background-color: #f5c518;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.text-white {
+    -fx-text-fill: #ffffff;
+}
+
