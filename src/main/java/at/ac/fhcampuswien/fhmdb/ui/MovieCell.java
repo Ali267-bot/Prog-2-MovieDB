@@ -2,6 +2,9 @@ package at.ac.fhcampuswien.fhmdb.ui;
 
 import at.ac.fhcampuswien.fhmdb.models.Genres;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.util.ClickEventHandler;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -26,7 +29,12 @@ public class MovieCell extends ListCell<Movie> {
     private final VBox textLayout = new VBox(title, detail, genres, releaseYearLabel, ratingLabel, addToWatchlistBtn);
     private final HBox layout = new HBox(posterImage, textLayout);
 
-    public MovieCell() {
+    private final ClickEventHandler<Movie> addToWatchlistClicked;
+
+    public MovieCell(DoubleBinding widthBinding, ClickEventHandler<Movie> addToWatchlistClicked) {
+        this.addToWatchlistClicked = addToWatchlistClicked;
+
+        layout.maxWidthProperty().bind(widthBinding);
         textLayout.setSpacing(5);
         layout.setSpacing(10);
         posterImage.setFitWidth(100);
@@ -36,10 +44,22 @@ public class MovieCell extends ListCell<Movie> {
         addToWatchlistBtn.getStyleClass().add("button-watchlist");
         addToWatchlistBtn.setOnAction(event -> handleAddToWatchlist(getItem()));
 
+        title.setWrapText(true);
+        detail.setWrapText(true);
+        genres.setWrapText(true);
+        releaseYearLabel.setWrapText(true);
+        ratingLabel.setWrapText(true);
+
         layout.setBackground(new Background(new BackgroundFill(Color.web("#262626"), CornerRadii.EMPTY, Insets.EMPTY)));
         layout.setPadding(new Insets(10));
         layout.spacingProperty().set(10);
         layout.alignmentProperty().set(javafx.geometry.Pos.CENTER_LEFT);
+
+        addToWatchlistBtn.setOnAction(event -> {
+            if (getItem() != null) {
+                this.addToWatchlistClicked.onClick(getItem());
+            }
+        });
     }
 
     @Override

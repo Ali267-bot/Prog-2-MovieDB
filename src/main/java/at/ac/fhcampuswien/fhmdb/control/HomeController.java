@@ -1,14 +1,20 @@
 package at.ac.fhcampuswien.fhmdb.control;
 
+import at.ac.fhcampuswien.fhmdb.db.DatabaseManager;
 import at.ac.fhcampuswien.fhmdb.models.Genres;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.models.MovieEntity;
+import at.ac.fhcampuswien.fhmdb.repositories.MovieRepository;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
+import at.ac.fhcampuswien.fhmdb.util.ClickEventHandler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.j256.ormlite.support.ConnectionSource;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
 import javafx.application.Platform;
+import javafx.beans.binding.DoubleBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -20,6 +26,7 @@ import javafx.scene.control.*;
 
 import java.net.URI;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -45,6 +52,7 @@ import static at.ac.fhcampuswien.fhmdb.models.Movie.normalizeString;
  * HomeController manages the UI logic for the Movie list and filter functionality.
  */
 public class HomeController implements Initializable {
+    private MovieRepository movieRepository;
     @FXML
     public VBox mainContent;
     @FXML
@@ -110,6 +118,21 @@ public class HomeController implements Initializable {
         genreComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
         releaseYearField.textProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
         ratingField.textProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
+
+
+
+        try {
+            DatabaseManager dbManager = new DatabaseManager();
+            ConnectionSource connectionSource = dbManager.getConnectionSource();
+
+            this.movieRepository = new MovieRepository(connectionSource);
+
+            dbManager.createTableIfNotExists();
+        } catch (SQLException e) {
+            System.err.println("Error initializing movie repository: " + e.getMessage());
+        }
+
+
     }
 
 
@@ -183,7 +206,8 @@ public class HomeController implements Initializable {
      */
     private void setupListView() {
         movieListView.setItems(filteredMovies);
-        movieListView.setCellFactory(movieListView -> new MovieCell());
+        DoubleBinding widthBinding = movieListView.widthProperty().multiply(1);
+        movieListView.setCellFactory(lv -> new MovieCell(widthBinding, onAddToWatchlistClicked));
     }
 
     /**
@@ -466,11 +490,10 @@ public class HomeController implements Initializable {
             initializeSidebar();
             isSidebarInitialized = true;
         }
-        // Check if the sidebar is currently visible by checking if it's part of the rootLayout's children
         if (rootLayout.getChildren().contains(sidebar)) {
-            rootLayout.getChildren().remove(sidebar); // If visible, remove it, thus hiding the sidebar
+            rootLayout.getChildren().remove(sidebar);
         } else {
-            rootLayout.getChildren().add(0, sidebar); // If not visible, add it to the beginning of the HBox, making it visible
+            rootLayout.getChildren().add(0, sidebar);
         }
     }
 
@@ -493,7 +516,6 @@ public class HomeController implements Initializable {
         mainContent.getChildren().addAll(filters, movieListView, noMoviesLabel);
     }
 
-    // Helper method to create a VBox for the watchlist
     private VBox createWatchlistVBox() {
 
         watchlistVBox = new VBox();
@@ -507,5 +529,41 @@ public class HomeController implements Initializable {
         watchlistVBox.getChildren().addAll(titleLabel, contentLabel);
 
         return watchlistVBox;
+    }
+
+    private final ClickEventHandler<Movie> onAddToWatchlistClicked = movie -> {
+        try {
+            MovieEntity movieEntity = convertToMovieEntity(movie);
+            movieRepository.addMovie(movieEntity);
+            System.out.println("Movie added to watchlist: " + movie.getTitle());
+
+            movieRepository.getAllMovies().forEach(e -> {
+                System.out.println(e.getTitle());
+            });
+        } catch (SQLException e) {
+            System.err.println("Failed to add movie to watchlist: " + e.getMessage());
+        }
+    };
+
+
+
+
+    private MovieEntity convertToMovieEntity(Movie movie) {
+        // Extract the genre names from the Genres enum list and join them into a comma-separated string.
+        List<String> genreNames = movie.getGenres().stream()
+                .map(Enum::name)
+                .collect(Collectors.toList());
+
+        // Create a new MovieEntity object with properties mapped from the Movie object.
+        return new MovieEntity(
+                movie.getId(), // apiId in MovieEntity corresponds to id in Movie
+                movie.getTitle(),
+                movie.getDescription(),
+                genreNames, // Pass the converted list of genre names
+                movie.getReleaseYear(),
+                movie.getImgUrl(),
+                120, // Assuming a fixed length in minutes for this example, adapt as needed
+                movie.getRating()
+        );
     }
 }
