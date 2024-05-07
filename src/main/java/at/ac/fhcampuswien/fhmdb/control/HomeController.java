@@ -15,6 +15,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 
 import java.net.URI;
@@ -28,6 +29,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import org.apache.http.client.methods.HttpGet;
@@ -43,6 +45,11 @@ import static at.ac.fhcampuswien.fhmdb.models.Movie.normalizeString;
  * HomeController manages the UI logic for the Movie list and filter functionality.
  */
 public class HomeController implements Initializable {
+    @FXML
+    public VBox mainContent;
+    @FXML
+    public HBox filters;
+    private VBox watchlistVBox;
 
     @FXML
     private HBox rootLayout;
@@ -446,8 +453,12 @@ public class HomeController implements Initializable {
         VBox.setVgrow(watchlistButton, Priority.ALWAYS);
         VBox.setVgrow(aboutButton, Priority.ALWAYS);
 
+        watchlistButton.setOnAction(this::handleWatchlist);
+        homeButton.setOnAction(event -> handleHomeButtonAction());
+
         sidebar.getChildren().addAll(homeButton, watchlistButton, aboutButton);
     }
+
 
     private boolean isSidebarInitialized = false;
     public void handleMenuButtonAction() {
@@ -464,12 +475,31 @@ public class HomeController implements Initializable {
     }
 
 
-    public void handleHome(ActionEvent actionEvent) {
-    }
 
     public void handleWatchlist(ActionEvent actionEvent) {
+        mainContent.getChildren().remove(movieListView);
+        mainContent.getChildren().remove(noMoviesLabel);
+        mainContent.getChildren().remove(filters);
+        mainContent.getChildren().add(createWatchlistVBox());
     }
 
-    public void handleAbout(ActionEvent actionEvent) {
+    private void handleHomeButtonAction() {
+        mainContent.getChildren().remove(watchlistVBox);
+        mainContent.getChildren().addAll(filters, movieListView, noMoviesLabel);
+    }
+
+    // Helper method to create a VBox for the watchlist
+    private VBox createWatchlistVBox() {
+        watchlistVBox = new VBox();
+        watchlistVBox.setStyle("-fx-background-color: #EEE; -fx-padding: 20;");
+        Label titleLabel = new Label("My Watchlist");
+        titleLabel.setFont(new Font("Arial", 24));
+
+        Label contentLabel = new Label("You currently have no movies saved to your watchlist.");
+        contentLabel.setWrapText(true);
+        VBox.setMargin(contentLabel, new Insets(10, 0, 0, 0));
+
+        watchlistVBox.getChildren().addAll(titleLabel, contentLabel);
+        return watchlistVBox;
     }
 }
