@@ -33,14 +33,16 @@ public class DatabaseManager {
         }
     }
 
-    
-
     private void createConnectionSource() throws DatabaseException.ConnectionException {
         try {
             this.connectionSource = new JdbcConnectionSource(DATABASE_URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
             throw new DatabaseException.ConnectionException("Connection error" + e.getMessage(), e);
         }
+    }
+
+    public ConnectionSource getConnectionSource() {
+        return connectionSource;
     }
 }
 
