@@ -2,6 +2,8 @@ package at.ac.fhcampuswien.fhmdb.ui;
 
 import at.ac.fhcampuswien.fhmdb.models.Genres;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.models.WatchlistMovieEntity;
+import at.ac.fhcampuswien.fhmdb.repositories.WatchlistRepository;
 import at.ac.fhcampuswien.fhmdb.util.ClickEventHandler;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
@@ -17,6 +19,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+import java.sql.SQLException;
+
 public class MovieCell extends ListCell<Movie> {
     private final Label title = new Label();
     private final Label detail = new Label();
@@ -24,16 +28,16 @@ public class MovieCell extends ListCell<Movie> {
     private final Label releaseYearLabel = new Label();
     private final Label ratingLabel = new Label();
     private final ImageView posterImage = new ImageView();
-    private final Button addToWatchlistBtn = new Button("Add");
+    private final Button actionButton = new Button();
 
-    private final VBox textLayout = new VBox(title, detail, genres, releaseYearLabel, ratingLabel, addToWatchlistBtn);
+    private final VBox textLayout = new VBox(title, detail, genres, releaseYearLabel, ratingLabel, actionButton);
     private final HBox layout = new HBox(posterImage, textLayout);
+    private final ClickEventHandler<Movie> onAction;
+    private final WatchlistRepository watchlistRepository;
 
-    private final ClickEventHandler<Movie> addToWatchlistClicked;
-
-    public MovieCell(DoubleBinding widthBinding, ClickEventHandler<Movie> addToWatchlistClicked) {
-        this.addToWatchlistClicked = addToWatchlistClicked;
-
+    public MovieCell(DoubleBinding widthBinding, WatchlistRepository watchlistRepository, ClickEventHandler<Movie> onAction) {
+        this.onAction = onAction;
+        this.watchlistRepository = watchlistRepository;
         layout.maxWidthProperty().bind(widthBinding);
         textLayout.setSpacing(5);
         layout.setSpacing(10);
@@ -41,8 +45,7 @@ public class MovieCell extends ListCell<Movie> {
         posterImage.setFitHeight(150);
         posterImage.setPreserveRatio(true);
 
-        addToWatchlistBtn.getStyleClass().add("button-watchlist");
-        addToWatchlistBtn.setOnAction(event -> handleAddToWatchlist(getItem()));
+        actionButton.getStyleClass().add("button-watchlist");
 
         title.setWrapText(true);
         detail.setWrapText(true);
@@ -54,12 +57,6 @@ public class MovieCell extends ListCell<Movie> {
         layout.setPadding(new Insets(10));
         layout.spacingProperty().set(10);
         layout.alignmentProperty().set(javafx.geometry.Pos.CENTER_LEFT);
-
-        addToWatchlistBtn.setOnAction(event -> {
-            if (getItem() != null) {
-                this.addToWatchlistClicked.onClick(getItem());
-            }
-        });
     }
 
     @Override
@@ -74,21 +71,22 @@ public class MovieCell extends ListCell<Movie> {
             this.getStyleClass().add("movie-cell");
             title.setText(movie.getTitle());
             detail.setText(movie.getDescription() != null ? movie.getDescription() : "No description available");
-
             StringBuilder genresText = new StringBuilder();
             for (Genres genre : movie.getGenres()) {
                 if (!genresText.isEmpty()) genresText.append(", ");
                 genresText.append(genre.name());
             }
             genres.setText(genresText.toString());
-
             releaseYearLabel.setText("Year: " + movie.getReleaseYear());
             ratingLabel.setText("Rating: " + movie.getRating());
+            posterImage.setImage(movie.getImgUrl() != null && !movie.getImgUrl().isEmpty() ? ImageCache.getImage(movie.getImgUrl()) : null);
 
-            if (movie.getImgUrl() != null && !movie.getImgUrl().isEmpty()) {
-                posterImage.setImage(ImageCache.getImage(movie.getImgUrl()));
-            } else {
-                posterImage.setImage(null);
+            try {
+                configureButton(movie);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                actionButton.setText("Error");
+                actionButton.setDisable(true);
             }
 
             title.getStyleClass().add("text-white");
@@ -101,9 +99,38 @@ public class MovieCell extends ListCell<Movie> {
         }
     }
 
-    private void handleAddToWatchlist(Movie movie) {
-        if (movie != null) {
-            System.out.println("Added to watchlist: " + movie.getTitle());
+    private void configureButton(Movie movie) throws SQLException {
+        if (watchlistRepository.isMovieInWatchlist(movie.getId())) {
+            actionButton.setText("Remove from Watchlist");
+            actionButton.setOnAction(e -> {
+                removeFromWatchlist(movie);
+                onAction.onClick(movie);
+            });
+        } else {
+            actionButton.setText("Add to Watchlist");
+            actionButton.setOnAction(e -> {
+                addToWatchlist(movie);
+                onAction.onClick(movie);
+            });
+        }
+    }
+
+    private void addToWatchlist(Movie movie) {
+        try {
+            watchlistRepository.addToWatchlist(new WatchlistMovieEntity(movie.getId()));
+            configureButton(movie); // Refresh button state
+        } catch (SQLException e) {
+            System.err.println("Error adding to watchlist: " + e.getMessage());
+        }
+    }
+
+    private void removeFromWatchlist(Movie movie) {
+        try {
+            watchlistRepository.removeFromWatchlist(movie.getId());
+            configureButton(movie); // Refresh button state
+        } catch (SQLException e) {
+            System.err.println("Error removing from watchlist: " + e.getMessage());
         }
     }
 }
+

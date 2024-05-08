@@ -32,6 +32,7 @@
 .movie-cell {
     -fx-background-color: #262626;
     -fx-padding: 2;
+    -fx-text-fill: white;
 }
 
 .filter-combo-box {

@@ -35,6 +35,15 @@ public class WatchlistRepository {
         }
     }
 
+
+    public boolean isMovieInWatchlist(String apiId) throws SQLException {
+        WatchlistMovieEntity movie = watchlistDao.queryBuilder()
+                .where()
+                .eq("apiId", apiId)
+                .queryForFirst();
+        return movie != null;
+    }
+
     public List<WatchlistMovieEntity> getWatchlist() throws SQLException {
         return watchlistDao.queryForAll();
     }

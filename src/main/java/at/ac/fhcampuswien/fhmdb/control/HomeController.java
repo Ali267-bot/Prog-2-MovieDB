@@ -226,8 +226,9 @@ public class HomeController implements Initializable {
      */
     private void setupListView() {
         movieListView.setItems(filteredMovies);
-        DoubleBinding widthBinding = movieListView.widthProperty().multiply(1);
-        movieListView.setCellFactory(lv -> new MovieCell(widthBinding, onAddToWatchlistClicked));
+        movieListView.setCellFactory(lv -> new MovieCell(lv.widthProperty().multiply(0.95), watchlistRepository, movie -> {
+            System.out.println("Clicked: " + movie.getTitle());
+        }));
     }
 
     /**
@@ -577,9 +578,7 @@ public class HomeController implements Initializable {
 
                 ListView<Movie> listView = new ListView<>(movieItems);
                 DoubleBinding widthBinding = listView.widthProperty().subtract(2);
-                listView.setCellFactory(lv -> new MovieCell(widthBinding, movie -> {
-                    System.out.println("Added to watchlist: " + movie.getTitle());
-                }));
+                listView.setCellFactory(lv -> new MovieCell(widthBinding, watchlistRepository, movie -> System.out.println("Action performed on: " + movie.getTitle())));
                 watchlistVBox.getChildren().add(listView);
             }
         } catch (SQLException e) {
