@@ -15,6 +15,9 @@ public class DatabaseManager {
     private static final String USERNAME = "admin";
     private static final String PASSWORD = "admin";
 
+    private Dao<MovieEntity, String> movieDao;
+    private Dao<WatchlistMovieEntity, String> watchlistDao;
+
     private ConnectionSource connectionSource;
 
     public DatabaseManager() throws DatabaseException.ConnectionException {
@@ -43,6 +46,22 @@ public class DatabaseManager {
 
     public ConnectionSource getConnectionSource() {
         return connectionSource;
+    }
+
+    public Dao<MovieEntity, String> getMovieDao() {
+        return movieDao;
+    }
+
+    public Dao<WatchlistMovieEntity, String> getWatchlistDao() {
+        return watchlistDao;
+    }
+
+    public void setMovieDao(Dao<MovieEntity, String> movieDao) {
+        this.movieDao = movieDao;
+    }
+
+    public void setWatchlistDao(Dao<WatchlistMovieEntity, String> watchlistDao) {
+        this.watchlistDao = watchlistDao;
     }
 }
 
