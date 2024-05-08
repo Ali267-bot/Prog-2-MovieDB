@@ -3,6 +3,7 @@ package at.ac.fhcampuswien.fhmdb.models;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -138,6 +139,41 @@ public class MovieEntity {
 
     public void setRating(double rating) {
         this.rating = rating;
+    }
+
+    public List<Movie> toMovies(List<MovieEntity> list) {
+        List<Movie> erg = new ArrayList<>();
+        for (MovieEntity m : list) {
+            erg.add(new Movie(
+                    m.getApiId(),
+                    m.getTitle(),
+                    m.getDescription(),
+                    m.getGenres(),
+                    m.getImgUrl(),
+                    m.getReleaseYear(),
+                    m.getRating(),
+                    null, // mainCast, fill with null or appropriate default
+                    null  // directors, fill with null or appropriate default
+            ));
+        }
+        return erg;
+    }
+
+    public List<MovieEntity> fromMovies(List<Movie> list) {
+        List<MovieEntity> erg = new ArrayList<>();
+        for (Movie m : list) {
+            erg.add(new MovieEntity(
+                    m.getId(),
+                    m.getTitle(),
+                    m.getDescription(),
+                    new ArrayList<>(),
+                    m.getReleaseYear(),
+                    m.getImgUrl(),
+                    0,
+                    m.getRating()
+            ));
+        }
+        return erg;
     }
 }
 
