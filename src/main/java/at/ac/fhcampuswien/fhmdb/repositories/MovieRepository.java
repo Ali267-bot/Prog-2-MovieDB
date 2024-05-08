@@ -82,5 +82,12 @@ public class MovieRepository {
             movieDao.delete(m);
         }
     }
+
+    public MovieEntity getMovie(String apiId) throws SQLException {
+        return movieDao.queryBuilder()
+                .where()
+                .eq("apiId", apiId)
+                .queryForFirst();
+    }
 }
 
