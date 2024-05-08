@@ -76,5 +76,11 @@ public class MovieRepository {
                 null  // directors, fill with null or appropriate default
         );
     }
+
+    public void removeAllMovies() throws SQLException {
+        for (MovieEntity m : getAllMovies()) {
+            movieDao.delete(m);
+        }
+    }
 }
 
