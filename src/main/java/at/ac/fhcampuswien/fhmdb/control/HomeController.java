@@ -37,9 +37,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
@@ -482,13 +481,18 @@ public class HomeController implements Initializable {
 
     private void initializeSidebar() {
         sidebar = new VBox();
-        sidebar.setStyle("-fx-background-color: white; -fx-padding: 10;");
+        sidebar.setStyle("-fx-background-color: black; -fx-padding: 10;");
         sidebar.setMinWidth(200);
         sidebar.setFillWidth(true);
 
         Button homeButton = new Button("Home");
         Button watchlistButton = new Button("Watchlist");
         Button aboutButton = new Button("About");
+
+        String buttonStyle = "-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 14px;";
+        homeButton.setStyle(buttonStyle);
+        watchlistButton.setStyle(buttonStyle);
+        aboutButton.setStyle(buttonStyle);
 
         homeButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         watchlistButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -537,27 +541,13 @@ public class HomeController implements Initializable {
         mainContent.getChildren().addAll(filters, movieListView, noMoviesLabel);
     }
 
-    private Movie convertToMovie(MovieEntity movieEntity) {
-        if (movieEntity == null) return null;
-
-        return new Movie(
-                movieEntity.getApiId(),       // Assuming API ID is stored and can be used as the unique identifier
-                movieEntity.getTitle(),
-                movieEntity.getDescription(),
-                movieEntity.getGenres(),
-                movieEntity.getImgUrl(),
-                movieEntity.getReleaseYear(),
-                movieEntity.getRating(),
-                null,   // mainCast is null
-                null    // directors is null
-        );
-    }
-
     private VBox createWatchlistVBox() {
         watchlistVBox = new VBox();
-        watchlistVBox.setStyle("-fx-background-color: #EEE; -fx-padding: 20;");
+        watchlistVBox.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+        watchlistVBox.setStyle("-fx-padding: 20;");
         Label titleLabel = new Label("My Watchlist");
         titleLabel.setFont(new Font("Arial", 24));
+        titleLabel.setTextFill(Color.WHITE);
         watchlistVBox.getChildren().add(titleLabel);
 
         try {
@@ -565,6 +555,7 @@ public class HomeController implements Initializable {
             if (watchlist.isEmpty()) {
                 Label contentLabel = new Label("You currently have no movies saved to your watchlist.");
                 contentLabel.setWrapText(true);
+                contentLabel.setTextFill(Color.WHITE);
                 VBox.setMargin(contentLabel, new Insets(10, 0, 0, 0));
                 watchlistVBox.getChildren().add(contentLabel);
             } else {
@@ -577,13 +568,18 @@ public class HomeController implements Initializable {
                 }
 
                 ListView<Movie> listView = new ListView<>(movieItems);
-                DoubleBinding widthBinding = listView.widthProperty().subtract(2);
+                DoubleBinding widthBinding = listView.widthProperty().multiply(0.95);
+                listView.setPrefWidth(widthBinding.get());
+                listView.setMinWidth(0);
+                listView.setMaxWidth(Double.MAX_VALUE);
+                listView.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
                 listView.setCellFactory(lv -> new MovieCell(widthBinding, watchlistRepository, movie -> System.out.println("Action performed on: " + movie.getTitle())));
                 watchlistVBox.getChildren().add(listView);
             }
         } catch (SQLException e) {
             Label errorLabel = new Label("Failed to load watchlist: " + e.getMessage());
             errorLabel.setWrapText(true);
+            errorLabel.setTextFill(Color.WHITE);
             VBox.setMargin(errorLabel, new Insets(10, 0, 0, 0));
             watchlistVBox.getChildren().add(errorLabel);
         }
@@ -592,38 +588,20 @@ public class HomeController implements Initializable {
     }
 
 
-    private final ClickEventHandler<Movie> onAddToWatchlistClicked = movie -> {
-        try {
-            WatchlistMovieEntity watchlistMovie = new WatchlistMovieEntity(movie.getId());
-            watchlistRepository.addToWatchlist(watchlistMovie);
-            System.out.println("Movie added to watchlist: " + movie.getTitle());
-
-            watchlistRepository.getWatchlist().forEach(e -> {
-                System.out.println(e.getApiId());
-            });
-        } catch (SQLException e) {
-            System.err.println("Failed to add movie to watchlist: " + e.getMessage());
-        }
-    };
-
-
 
 
     private MovieEntity convertToMovieEntity(Movie movie) {
-        // Extract the genre names from the Genres enum list and join them into a comma-separated string.
         List<String> genreNames = movie.getGenres().stream()
                 .map(Enum::name)
                 .collect(Collectors.toList());
-
-        // Create a new MovieEntity object with properties mapped from the Movie object.
         return new MovieEntity(
-                movie.getId(), // apiId in MovieEntity corresponds to id in Movie
+                movie.getId(),
                 movie.getTitle(),
                 movie.getDescription(),
-                genreNames, // Pass the converted list of genre names
+                genreNames,
                 movie.getReleaseYear(),
                 movie.getImgUrl(),
-                120, // Assuming a fixed length in minutes for this example, adapt as needed
+                120,
                 movie.getRating()
         );
     }
