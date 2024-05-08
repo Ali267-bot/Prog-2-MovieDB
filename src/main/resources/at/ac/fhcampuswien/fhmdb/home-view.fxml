@@ -45,7 +45,7 @@
             <children>
                <JFXButton fx:id="menuButton" onAction="#handleMenuButtonAction" styleClass="burger-menu-button" stylesheets="@styles.css">
                   <graphic>
-                     <FontIcon iconLiteral="fas-bars" />
+                     <FontIcon fx:id="menuIcon" iconLiteral="fas-bars" />
                   </graphic>
                </JFXButton>
             </children>

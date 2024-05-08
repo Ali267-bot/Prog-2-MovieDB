@@ -8,6 +8,7 @@ module at.ac.fhcampuswien.fhmdb {
     requires com.fasterxml.jackson.databind;
     requires ormlite.jdbc;
     requires java.sql;
+    requires org.kordamp.ikonli.javafx;
 
     opens at.ac.fhcampuswien.fhmdb to javafx.fxml;
     opens at.ac.fhcampuswien.fhmdb.control to javafx.fxml;

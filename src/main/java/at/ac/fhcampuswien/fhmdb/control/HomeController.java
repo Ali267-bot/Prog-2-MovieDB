@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.fhmdb.control;
 
+import org.kordamp.ikonli.javafx.FontIcon;
 import at.ac.fhcampuswien.fhmdb.db.DatabaseManager;
 import at.ac.fhcampuswien.fhmdb.exceptions.DatabaseException;
 import at.ac.fhcampuswien.fhmdb.exceptions.MovieAPIException;
@@ -509,6 +510,8 @@ public class HomeController implements Initializable {
     }
 
 
+    @FXML
+    private FontIcon menuIcon;
     private boolean isSidebarInitialized = false;
     public void handleMenuButtonAction() {
         if (!isSidebarInitialized) {
@@ -517,8 +520,10 @@ public class HomeController implements Initializable {
         }
         if (rootLayout.getChildren().contains(sidebar)) {
             rootLayout.getChildren().remove(sidebar);
+            menuIcon.setIconLiteral("fas-bars");
         } else {
             rootLayout.getChildren().add(0, sidebar);
+            menuIcon.setIconLiteral("fas-times");
         }
     }
 
