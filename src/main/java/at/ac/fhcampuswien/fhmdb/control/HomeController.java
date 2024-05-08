@@ -1,6 +1,8 @@
 package at.ac.fhcampuswien.fhmdb.control;
 
 import at.ac.fhcampuswien.fhmdb.db.DatabaseManager;
+import at.ac.fhcampuswien.fhmdb.exceptions.DatabaseException;
+import at.ac.fhcampuswien.fhmdb.exceptions.MovieAPIException;
 import at.ac.fhcampuswien.fhmdb.models.Genres;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.MovieEntity;
@@ -130,6 +132,10 @@ public class HomeController implements Initializable {
             dbManager.createTableIfNotExists();
         } catch (SQLException e) {
             System.err.println("Error initializing movie repository: " + e.getMessage());
+        } catch (DatabaseException.ConnectionException e) {
+            throw new RuntimeException(e);
+        } catch (DatabaseException.OperationException e) {
+            throw new RuntimeException(e);
         }
 
 
