@@ -163,33 +163,69 @@ public class HomeController implements Initializable {
     private void fetchMovies(String query, String genre, String releaseYear, String rating) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             URIBuilder uriBuilder = new URIBuilder("https://prog2.fh-campuswien.ac.at/movies");
-
             Map<String, String> params = new HashMap<>();
             params.put("query", query);
             params.put("genre", genre);
             params.put("releaseYear", releaseYear);
             params.put("ratingFrom", rating);
 
-            params.forEach((key, value) -> addParameterIfPresent(uriBuilder, key, value));
+            params.forEach(uriBuilder::addParameter);
 
             URI uri = uriBuilder.build();
             HttpGet request = new HttpGet(uri);
             String jsonResponse = client.execute(request, httpResponse -> EntityUtils.toString(httpResponse.getEntity()));
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            moviesData = mapper.readValue(jsonResponse, new TypeReference<>() {});
+            moviesData = mapper.readValue(jsonResponse, new TypeReference<List<Movie>>() {});
 
-            Platform.runLater(() -> {
-                observableMovies.setAll(moviesData);
-                logResults(moviesData);
-                addAllMoviesToDatabase();
-            });
-
-            System.out.printf("API call performing.\nURL Used: %s\n", uri);
-            updateUIBasedOnFilterResults();
+            if (moviesData == null || moviesData.isEmpty()) {
+                loadMoviesFromDatabase();
+            } else {
+                Platform.runLater(() -> {
+                    observableMovies.setAll(moviesData);
+                    addAllMoviesToDatabase();
+                    updateUIBasedOnFilterResults();
+                });
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            Platform.runLater(() -> {
+                loadMoviesFromDatabase();
+                showError("Failed to fetch movies from API, loaded from database instead.");
+            });
         }
+    }
+
+    private void loadMoviesFromDatabase() {
+        try {
+            List<MovieEntity> movieEntities = movieRepository.getAllMovies();
+            List<Movie> dbMovies = movieEntities.stream().map(this::convertToMovie).collect(Collectors.toList());
+            Platform.runLater(() -> {
+                observableMovies.setAll(dbMovies);
+                updateUIBasedOnFilterResults();
+            });
+        } catch (SQLException e) {
+            Platform.runLater(() -> showError("Failed to load movies from database: " + e.getMessage()));
+        }
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        alert.showAndWait();
+    }
+
+    private Movie convertToMovie(MovieEntity movieEntity) {
+        return new Movie(
+                movieEntity.getApiId(),
+                movieEntity.getTitle(),
+                movieEntity.getDescription(),
+                movieEntity.getGenres(),
+                movieEntity.getImgUrl(),
+                movieEntity.getReleaseYear(),
+                movieEntity.getRating(),
+                null,
+                null
+        );
     }
 
     private void addAllMoviesToDatabase() {
