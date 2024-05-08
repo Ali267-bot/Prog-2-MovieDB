@@ -17,11 +17,7 @@ public class DatabaseManager {
     private ConnectionSource connectionSource;
 
     public DatabaseManager() throws DatabaseException.ConnectionException {
-        try {
-            connectionSource = new JdbcConnectionSource(DATABASE_URL, USERNAME, PASSWORD);
-        } catch (SQLException e) {
-            throw new DatabaseException.ConnectionException("Connection error" + e.getMessage(), e);
-        }
+        createConnectionSource();
     }
 
     public void createTableIfNotExists() throws DatabaseException.OperationException {
@@ -38,6 +34,14 @@ public class DatabaseManager {
 
     public ConnectionSource getConnectionSource() {
         return connectionSource;
+    }
+
+    private void createConnectionSource() throws DatabaseException.ConnectionException {
+        try {
+            this.connectionSource = new JdbcConnectionSource(DATABASE_URL, USERNAME, PASSWORD);
+        } catch (SQLException e) {
+            throw new DatabaseException.ConnectionException("Connection error" + e.getMessage(), e);
+        }
     }
 }
 

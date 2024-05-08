@@ -76,12 +76,5 @@ public class MovieRepository {
                 null  // directors, fill with null or appropriate default
         );
     }
-
-    private List<Genres> parseGenres(String genres) {
-        return Arrays.stream(genres.split(","))
-                .map(String::trim)
-                .map(genre -> Genres.valueOf(genre.toUpperCase()))
-                .collect(Collectors.toList());
-    }
 }
 
