@@ -3,6 +3,7 @@ package at.ac.fhcampuswien.fhmdb.db;
 import at.ac.fhcampuswien.fhmdb.exceptions.DatabaseException;
 import at.ac.fhcampuswien.fhmdb.models.MovieEntity;
 import at.ac.fhcampuswien.fhmdb.models.WatchlistMovieEntity;
+import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
@@ -32,9 +33,7 @@ public class DatabaseManager {
         }
     }
 
-    public ConnectionSource getConnectionSource() {
-        return connectionSource;
-    }
+    
 
     private void createConnectionSource() throws DatabaseException.ConnectionException {
         try {

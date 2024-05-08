@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 public class MovieRepository {
     private final Dao<MovieEntity, String> movieDao;
 
+    public Dao<MovieEntity, String> getMovieDao() {
+        return movieDao;
+    }
+
     public MovieRepository(ConnectionSource connectionSource) throws SQLException {
         movieDao = DaoManager.createDao(connectionSource, MovieEntity.class);
     }

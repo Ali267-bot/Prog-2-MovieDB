@@ -11,6 +11,10 @@ import java.util.List;
 public class WatchlistRepository {
     private final Dao<WatchlistMovieEntity, String> watchlistDao;
 
+    public Dao<WatchlistMovieEntity, String> getWatchlistDao() {
+        return watchlistDao;
+    }
+
     public WatchlistRepository(ConnectionSource connectionSource) throws SQLException {
         watchlistDao = DaoManager.createDao(connectionSource, WatchlistMovieEntity.class);
     }
