@@ -16,7 +16,13 @@ public class DatabaseManager {
 
     private ConnectionSource connectionSource;
 
-
+    public DatabaseManager() throws DatabaseException.ConnectionException {
+        try {
+            connectionSource = new JdbcConnectionSource(DATABASE_URL, USERNAME, PASSWORD);
+        } catch (SQLException e) {
+            throw new DatabaseException.ConnectionException("Connection error" + e.getMessage(), e);
+        }
+    }
 
     public void createTableIfNotExists() throws DatabaseException.OperationException {
         try {
