@@ -536,26 +536,72 @@ public class HomeController implements Initializable {
         mainContent.getChildren().addAll(filters, movieListView, noMoviesLabel);
     }
 
-    private VBox createWatchlistVBox() {
+    private Movie convertToMovie(MovieEntity movieEntity) {
+        if (movieEntity == null) return null;
 
+        return new Movie(
+                movieEntity.getApiId(),       // Assuming API ID is stored and can be used as the unique identifier
+                movieEntity.getTitle(),
+                movieEntity.getDescription(),
+                movieEntity.getGenres(),
+                movieEntity.getImgUrl(),
+                movieEntity.getReleaseYear(),
+                movieEntity.getRating(),
+                null,   // mainCast is null
+                null    // directors is null
+        );
+    }
+
+    private VBox createWatchlistVBox() {
         watchlistVBox = new VBox();
         watchlistVBox.setStyle("-fx-background-color: #EEE; -fx-padding: 20;");
         Label titleLabel = new Label("My Watchlist");
         titleLabel.setFont(new Font("Arial", 24));
+        watchlistVBox.getChildren().add(titleLabel);
 
-        Label contentLabel = new Label("You currently have no movies saved to your watchlist.");
-        contentLabel.setWrapText(true);
-        VBox.setMargin(contentLabel, new Insets(10, 0, 0, 0));
-        watchlistVBox.getChildren().addAll(titleLabel, contentLabel);
+        try {
+            List<WatchlistMovieEntity> watchlist = watchlistRepository.getWatchlist();
+            if (watchlist.isEmpty()) {
+                Label contentLabel = new Label("You currently have no movies saved to your watchlist.");
+                contentLabel.setWrapText(true);
+                VBox.setMargin(contentLabel, new Insets(10, 0, 0, 0));
+                watchlistVBox.getChildren().add(contentLabel);
+            } else {
+                ObservableList<Movie> movieItems = FXCollections.observableArrayList();
+                for (WatchlistMovieEntity entity : watchlist) {
+                    Movie movie = movieRepository.findMovieByApiId(entity.getApiId());
+                    if (movie != null) {
+                        movieItems.add(movie);
+                    }
+                }
+
+                ListView<Movie> listView = new ListView<>(movieItems);
+                DoubleBinding widthBinding = listView.widthProperty().subtract(2);
+                listView.setCellFactory(lv -> new MovieCell(widthBinding, movie -> {
+                    System.out.println("Added to watchlist: " + movie.getTitle());
+                }));
+                watchlistVBox.getChildren().add(listView);
+            }
+        } catch (SQLException e) {
+            Label errorLabel = new Label("Failed to load watchlist: " + e.getMessage());
+            errorLabel.setWrapText(true);
+            VBox.setMargin(errorLabel, new Insets(10, 0, 0, 0));
+            watchlistVBox.getChildren().add(errorLabel);
+        }
 
         return watchlistVBox;
     }
+
 
     private final ClickEventHandler<Movie> onAddToWatchlistClicked = movie -> {
         try {
             WatchlistMovieEntity watchlistMovie = new WatchlistMovieEntity(movie.getId());
             watchlistRepository.addToWatchlist(watchlistMovie);
             System.out.println("Movie added to watchlist: " + movie.getTitle());
+
+            watchlistRepository.getWatchlist().forEach(e -> {
+                System.out.println(e.getApiId());
+            });
         } catch (SQLException e) {
             System.err.println("Failed to add movie to watchlist: " + e.getMessage());
         }

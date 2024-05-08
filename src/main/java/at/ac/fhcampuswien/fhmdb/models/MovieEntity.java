@@ -2,6 +2,8 @@ package at.ac.fhcampuswien.fhmdb.models;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,12 +83,29 @@ public class MovieEntity {
         this.description = description;
     }
 
-    public List<String> getGenres() {
-        return List.of(genres.split(","));
+    public List<Genres> getGenres() {
+        return Arrays.stream(genres.split(","))
+                .map(String::trim)
+                .map(genre -> {
+                    try {
+                        return Genres.valueOf(genre.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("Genre conversion error: " + genre);
+                        return null;
+                    }
+                })
+                .filter(genre -> genre != null)
+                .collect(Collectors.toList());
     }
 
-    public void setGenres(List<String> genres) {
-        this.genres = String.join(",", genres);
+    public void setGenres(List<Genres> genres) {
+        this.genres = convertGenresToString(genres);
+    }
+
+    private String convertGenresToString(List<Genres> genres) {
+        return genres.stream()
+                .map(Genres::name)
+                .collect(Collectors.joining(","));
     }
 
     public int getReleaseYear() {
