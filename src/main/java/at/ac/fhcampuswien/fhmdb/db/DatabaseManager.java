@@ -36,6 +36,8 @@ public class DatabaseManager {
         }
     }
 
-
+    public ConnectionSource getConnectionSource() {
+        return connectionSource;
+    }
 }
 
