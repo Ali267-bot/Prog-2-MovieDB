@@ -6,7 +6,9 @@ import at.ac.fhcampuswien.fhmdb.exceptions.MovieAPIException;
 import at.ac.fhcampuswien.fhmdb.models.Genres;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.MovieEntity;
+import at.ac.fhcampuswien.fhmdb.models.WatchlistMovieEntity;
 import at.ac.fhcampuswien.fhmdb.repositories.MovieRepository;
+import at.ac.fhcampuswien.fhmdb.repositories.WatchlistRepository;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import at.ac.fhcampuswien.fhmdb.util.ClickEventHandler;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -55,6 +57,8 @@ import static at.ac.fhcampuswien.fhmdb.models.Movie.normalizeString;
  */
 public class HomeController implements Initializable {
     private MovieRepository movieRepository;
+    private WatchlistRepository watchlistRepository;
+
     @FXML
     public VBox mainContent;
     @FXML
@@ -108,10 +112,24 @@ public class HomeController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        fetchMovies("", "", "", "");
-        // observableMovies.addAll(allMovies); Nicht mehr nötig, weil API
-        filteredMovies = new FilteredList<>(observableMovies, p -> true); // Initialize filtered list with a predicate that allows everything
 
+        try {
+            DatabaseManager dbManager = new DatabaseManager();
+            ConnectionSource connectionSource = dbManager.getConnectionSource();
+
+            fetchMovies("", "", "", "");
+            this.movieRepository = new MovieRepository(connectionSource);
+            this.watchlistRepository = new WatchlistRepository(connectionSource);
+
+            dbManager.createTableIfNotExists();
+        } catch (SQLException | DatabaseException.ConnectionException | DatabaseException.OperationException e) {
+            System.err.println("Error initializing repositories: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        filteredMovies = new FilteredList<>(observableMovies, p -> true);
+
+        addAllMoviesToDatabase();
         setupListView();
         setupGenreComboBox();
         setupActionHandlers();
@@ -121,22 +139,6 @@ public class HomeController implements Initializable {
         releaseYearField.textProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
         ratingField.textProperty().addListener((observable, oldValue, newValue) -> updateClearButtonVisibility());
 
-
-
-        try {
-            DatabaseManager dbManager = new DatabaseManager();
-            ConnectionSource connectionSource = dbManager.getConnectionSource();
-
-            this.movieRepository = new MovieRepository(connectionSource);
-
-            dbManager.createTableIfNotExists();
-        } catch (SQLException e) {
-            System.err.println("Error initializing movie repository: " + e.getMessage());
-        } catch (DatabaseException.ConnectionException e) {
-            throw new RuntimeException(e);
-        } catch (DatabaseException.OperationException e) {
-            throw new RuntimeException(e);
-        }
 
 
     }
@@ -177,12 +179,24 @@ public class HomeController implements Initializable {
             Platform.runLater(() -> {
                 observableMovies.setAll(moviesData);
                 logResults(moviesData);
+                addAllMoviesToDatabase();
             });
 
             System.out.printf("API call performing.\nURL Used: %s\n", uri);
             updateUIBasedOnFilterResults();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void addAllMoviesToDatabase() {
+        for (Movie movie : moviesData) {
+            try {
+                MovieEntity movieEntity = convertToMovieEntity(movie);
+                movieRepository.addMovie(movieEntity);
+            } catch (SQLException e) {
+                System.err.println("Error adding movie to database: " + e.getMessage());
+            }
         }
     }
 
@@ -539,13 +553,9 @@ public class HomeController implements Initializable {
 
     private final ClickEventHandler<Movie> onAddToWatchlistClicked = movie -> {
         try {
-            MovieEntity movieEntity = convertToMovieEntity(movie);
-            movieRepository.addMovie(movieEntity);
+            WatchlistMovieEntity watchlistMovie = new WatchlistMovieEntity(movie.getId());
+            watchlistRepository.addToWatchlist(watchlistMovie);
             System.out.println("Movie added to watchlist: " + movie.getTitle());
-
-            movieRepository.getAllMovies().forEach(e -> {
-                System.out.println(e.getTitle());
-            });
         } catch (SQLException e) {
             System.err.println("Failed to add movie to watchlist: " + e.getMessage());
         }

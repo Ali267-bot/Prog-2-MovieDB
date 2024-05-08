@@ -24,7 +24,6 @@ public class MovieRepository {
                 .where()
                 .eq("apiId", movie.getApiId())
                 .queryForFirst();
-
         if (existingMovie == null) {
             movieDao.create(movie);
         }
