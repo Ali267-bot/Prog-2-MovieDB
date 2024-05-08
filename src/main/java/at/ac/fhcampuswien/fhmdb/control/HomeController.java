@@ -121,6 +121,9 @@ public class HomeController implements Initializable {
             this.movieRepository = new MovieRepository(connectionSource);
             this.watchlistRepository = new WatchlistRepository(connectionSource);
 
+            dbManager.setMovieDao(movieRepository.getMovieDao());
+            dbManager.setWatchlistDao(watchlistRepository.getWatchlistDao());
+
             dbManager.createTableIfNotExists();
         } catch (SQLException | DatabaseException.ConnectionException | DatabaseException.OperationException e) {
             System.err.println("Error initializing repositories: " + e.getMessage());
